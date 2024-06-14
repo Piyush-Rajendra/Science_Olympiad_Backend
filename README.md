@@ -14,7 +14,7 @@ Copy code
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=
-DB_NAME=Science_Olympiad\
+DB_NAME=Science_Olympiad
 
 # Set PORT to your desired port number if you do not want to use 3000.
 
