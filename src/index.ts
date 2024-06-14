@@ -10,7 +10,7 @@ const port = 3001;
 app.use(express.json());
 
 app.get('/', (req: Request, res: Response) => {
-  res.send('Hello from Express and TypeScript');
+  res.send('Hello Backend is wokrking');
 });
 
 
