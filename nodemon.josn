@@ -1,0 +1,6 @@
+{
+  "watch": ["src"], // Adjust this based on your project's TypeScript files location
+  "ext": "ts",
+  "ignore": ["src/**/*.spec.ts"],
+  "exec": "ts-node ./src/index.ts"
+}

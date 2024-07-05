@@ -7,4 +7,4 @@ export default interface IMySQLResult {
     message: string;
     protocol41: boolean;
     changedRows: number;
-}
+}   

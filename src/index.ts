@@ -1,44 +1,35 @@
-import http from 'http';
-import bodyParser from 'body-parser';
 import express from 'express';
-import logging from './config/logging';
-import config from '../config/db.config';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import authRoutes from '../src/routes/auth.routes';
+import { createTables } from '.././src/middlewares/auth.middleware';
+import pool from '../config/db.config';
 
 
-const NAMESPACE = 'Server';
-const router = express();
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-/** Log the request */
-router.use((req, res, next) => {
-    /** Log the req */
-    logging.info(NAMESPACE, `METHOD: [${req.method}] - URL: [${req.url}] - IP: [${req.socket.remoteAddress}]`);
+app.use(bodyParser.json());
+app.use(cors());
+app.use('/auth', authRoutes);
 
-    res.on('finish', () => {
-        /** Log the res */
-        logging.info(NAMESPACE, `METHOD: [${req.method}] - URL: [${req.url}] - STATUS: [${res.statusCode}] - IP: [${req.socket.remoteAddress}]`);
-    })
-    
-    next();
+// Create tables before starting the server
+createTables().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}).catch(error => {
+  console.error('Error creating tables', error);
+  process.exit(1);
 });
 
-/** Parse the body of the request */
-router.use(bodyParser.urlencoded({ extended: true }));
-router.use(bodyParser.json());
-
-/** Rules of our API */
-router.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-
-    if (req.method == 'OPTIONS') {
-        res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
-        return res.status(200).json({});
-    }
-
-    next();
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught exception:', error.message);
+  process.exit(1); // Exit the process or handle the error as per your application's needs
 });
 
-
-const httpServer = http.createServer(router);
-
-httpServer.listen(config.dbConfig.port, () => logging.info(NAMESPACE, `Server is running ${config.dbConfig.host}:${config.dbConfig.port}`));
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Handle the error as per your application's needs
+});

@@ -1,17 +1,11 @@
-import  express  from "express";
-import authControllers from "../controllers/auth.controllers";
+import { Router } from 'express';
+import { register, login, getAllUsers } from '../controllers/auth.controllers';
+import { authenticateJWT } from '../middlewares/extractJWT';
 
-const router = express.Router();
+const router = Router();
 
-// Get Requests
+router.post('/register', register);
+router.post('/login', login);
+router.get('/users', authenticateJWT, getAllUsers);
 
-router.get('/validate', authControllers.validateToken);
-router.get('/get/all', authControllers.getAllusers);
-
-// Post Requests
-
-router.post('/register', authControllers.register);
-router.post('/login', authControllers.login);
-
-
-export = router;
+export default router;

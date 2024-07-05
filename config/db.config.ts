@@ -1,50 +1,22 @@
-import mysql from 'mysql2';
-import dotenv from 'dotenv';
-dotenv.config();
+import { createPool, Pool } from 'mysql2/promise';
 
-const SERVER_TOKEN_EXPIRETIME = process.env.SERVER_TOKEN_EXPIRETIME || 3600;
-const SERVER_TOKEN_ISSUER = process.env.SERVER_TOKEN_EXPIRETIME || "coolIssuer";
-const SERVER_TOKEN_SECRET = process.env.SERVER_TOKEN_SECRET || "superencryptedsecret";
-
-
-const dbConfig = {
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
+const pool: Pool = createPool({
+  host: 'localhost',
+  user: 'root',
   password: '',
-  token: {
-    expireTime : SERVER_TOKEN_EXPIRETIME,
-    issuer: SERVER_TOKEN_ISSUER,
-    secret: SERVER_TOKEN_SECRET
-  },
-  port: 3301,
-};
+  database: 'science_olympiad',
+  connectionLimit: 10
+});
 
-export const Connect = async () =>
-  new Promise<mysql.Connection>((resolve, reject) => {
-      const connection = mysql.createConnection(dbConfig);
-
-      connection.connect((error) => {
-          if (error) {
-              reject(error);
-              return;
-          }
-
-          resolve(connection);
-      });
+pool.getConnection()
+  .then(connection => {
+    console.log('Database connection established');
+    connection.release();
+  })
+  .catch(error => {
+    console.error('Error connecting to database:', error.message);
+    process.exit(1); // Exit the process or handle the error as per your application's needs
   });
 
-export const Query = async<T> (connection: mysql.Connection, query: string) =>
-  new Promise((resolve, reject) => {
-      connection.query(query, connection, (error, result) => {
-          if (error) {
-              reject(error);
-              return;
-          }
-
-          resolve(result);
-          connection.end();
-      });
-  });
-
-
-export default {dbConfig};
+  
+export default pool;
