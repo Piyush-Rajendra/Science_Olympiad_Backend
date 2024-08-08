@@ -3,13 +3,14 @@ import pool from '../../config/db.config';
 export const createTables = async () => {
   try {
     await pool.execute(`
-      CREATE TABLE IF NOT EXISTS users (
-        _id INT AUTO_INCREMENT,
+      CREATE TABLE IF NOT EXISTS superadmin (
+        _superadmin_id INT AUTO_INCREMENT,
+        name VARCHAR(255) NOT NULL,
         username VARCHAR(255) NOT NULL,
         password VARCHAR(255) NOT NULL,
         lastUpdated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         createdOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (_id)
+        PRIMARY KEY (_superadmin_id)
       )
     `);
     console.log('Tables created successfully');
