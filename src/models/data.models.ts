@@ -14,7 +14,6 @@ export interface ITournament {
   isCurrent: boolean;
   division: string;
   NumOfTimeBlocks: number;
-  score_id: number;
   name: string;
   date:  Date;
   location: String;
