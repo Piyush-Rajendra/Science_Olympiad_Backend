@@ -21,6 +21,16 @@ export const createDataTables = async () => {
         );
     `);
 
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS Team (
+        team_id INT AUTO_INCREMENT PRIMARY KEY,
+        school_id INT,
+        name VARCHAR(255) NOT NULL,
+        unique_id VARCHAR(100) NOT NULL,
+        FOREIGN KEY (school_id) REFERENCES School(ID) ON DELETE CASCADE ON UPDATE CASCADE
+        );
+        `)
+
     // Create EventSupervisor table
     await pool.execute(`
         CREATE TABLE IF NOT EXISTS EventSupervisor (
@@ -68,11 +78,13 @@ export const createDataTables = async () => {
             school_id INT,
             tournament_id INT,
             school_group_id INT,
+            team_id INT,
             is_reviewed BOOLEAN NOT NULL DEFAULT FALSE,
             FOREIGN KEY (event_id) REFERENCES Event(event_id) ON DELETE CASCADE ON UPDATE CASCADE,
             FOREIGN KEY (school_id) REFERENCES School(ID) ON DELETE CASCADE ON UPDATE CASCADE,
             FOREIGN KEY (tournament_id) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE,
-            FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE
+            FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE,
+            FOREIGN KEY (team_id) REFERENCES Team(team_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
     `);
 

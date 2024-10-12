@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import authRoutes from '../src/routes/auth.routes';
+import dataRoutes from '../src/routes/data.routes';
 import { createTables } from '.././src/middlewares/auth.middleware';
 import pool from '../config/db.config';
 import { createDataTables } from './middlewares/data.middleware';
@@ -14,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(cors());
 app.use('/auth', authRoutes);
-//app.use()
+app.use(dataRoutes)
 
 // Create tables before starting the server
 const startServer = async () => {

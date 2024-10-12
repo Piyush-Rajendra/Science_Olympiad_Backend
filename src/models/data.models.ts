@@ -45,6 +45,7 @@ export interface IScores {
   school_id: number;
   tournament_id: number; 
   school_group_id: number;
+  team_id: number;
   is_reviewed: boolean; 
 }
 

@@ -25,7 +25,7 @@ export const addTournament = async (req: Request, res: Response) => {
 
   try {
     const [result] = await pool.execute(
-      'INSERT INTO tournaments (name, division, group_id, isCurrent, NumOfTimeBlocks, location, description, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO tournament (name, division, group_id, isCurrent, NumOfTimeBlocks, location, description, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [
         newTournament.name,
         newTournament.division,
@@ -44,3 +44,79 @@ export const addTournament = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error adding tournament', error: error.message });
   }
 };
+
+export const getAllTournaments = async (req: Request, res: Response) => {
+    try {
+      const [tournaments] = await pool.execute('SELECT * FROM tournament');
+      res.status(200).json(tournaments);
+    } catch (error) {
+      console.error('Error fetching tournaments:', error);
+      res.status(500).json({ message: 'Error fetching tournaments', error: error.message });
+    }
+  };
+
+  export const editTournament = async (req: Request, res: Response) => {
+    const tournament_id = parseInt(req.params.id); // Get the tournament ID from the URL
+    const { name, division, group_id, isCurrent, NumOfTimeBlocks, location, description, date } = req.body;
+
+  
+    try {
+      const [result] = await pool.execute(
+        `UPDATE tournament 
+         SET name = ?, division = ?, group_id = ?, isCurrent = ?, NumOfTimeBlocks = ?, location = ?, description = ?, date = ?
+         WHERE tournament_id = ?`,
+        [
+          name,
+          division,
+          group_id,
+          isCurrent,
+          NumOfTimeBlocks,
+          location,
+          description,
+          date,
+          tournament_id, // Use the tournament ID from the URL
+        ]
+      );
+  
+      // Check if any rows were affected
+      const affectedRows = (result as { affectedRows: number }).affectedRows;
+  
+      if (affectedRows === 0) {
+        return res.status(404).json({ message: 'Tournament not found' });
+      }
+  
+      res.status(200).json({ message: 'Tournament updated successfully' });
+    } catch (error) {
+      console.error('Error updating tournament:', error);
+      res.status(500).json({ message: 'Error updating tournament', error: error.message });
+    }
+  };
+
+  export const deleteTournament = async (req: Request, res: Response) => {
+    const tournament_id = parseInt(req.params.id); // Get the tournament ID from the URL
+  
+    // Validate the tournament ID
+    if (!tournament_id) {
+      return res.status(400).json({ message: 'Tournament ID is required' });
+    }
+  
+    try {
+      const [result] = await pool.execute(
+        'DELETE FROM tournament WHERE tournament_id = ?',
+        [tournament_id] // Use the tournament ID from the URL
+      );
+  
+      // Check if any rows were affected
+      const affectedRows = (result as { affectedRows: number }).affectedRows;
+  
+      if (affectedRows === 0) {
+        return res.status(404).json({ message: 'Tournament not found' });
+      }
+  
+      res.status(200).json({ message: 'Tournament deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting tournament:', error);
+      res.status(500).json({ message: 'Error deleting tournament', error: error.message });
+    }
+  };
+
