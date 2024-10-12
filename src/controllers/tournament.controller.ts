@@ -3,7 +3,7 @@ import pool from '../../config/db.config';
 import { ITournament } from '../models/data.models'; // Adjust the import path
 
 export const addTournament = async (req: Request, res: Response) => {
-  const { name, division, group_id, NumOfTimeBlocks, location, description } = req.body;
+  const { name, division, group_id, isCurrent, NumOfTimeBlocks, location, description, date } = req.body;
 
   // Validate required fields
   if (!name || !division ) {
@@ -13,13 +13,13 @@ export const addTournament = async (req: Request, res: Response) => {
   // Create the new tournament object
   const newTournament: ITournament = {
     tournament_id: 0, // Auto-increment handled by the database
-    group_id: 0, // Use the group_id from the request body
-    isCurrent: false, // Set this according to your application logic
+    group_id: group_id, // Use the group_id from the request body
+    isCurrent: isCurrent, // Set this according to your application logic
     division: division, // Use the division from the request body
-    NumOfTimeBlocks: 0, // Use the NumOfTimeBlocks from the request body
+    NumOfTimeBlocks: NumOfTimeBlocks || 0, // Use the NumOfTimeBlocks from the request body
     name: name, // Use the name from the request body
-    date: new Date(), // Set to current date or a specific date
-    location: location || "Default Location", // Use the location from the request body or default
+    date: date || new Date(), // Set to current date or a specific date
+    location: location || "", // Use the location from the request body or default
     description: description || "", // Use the description from the request body or default to empty
   };
 
