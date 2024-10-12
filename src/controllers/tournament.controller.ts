@@ -120,3 +120,26 @@ export const getAllTournaments = async (req: Request, res: Response) => {
     }
   };
 
+  export const getTourneyById = async (req: Request, res: Response) => {
+    const tournamentId = parseInt(req.params.id); // Get tournament ID from the URL
+
+    if (isNaN(tournamentId)) {
+        return res.status(400).json({ message: 'Invalid tournament ID' });
+    }
+
+    try {
+        // Execute the select query
+        const [tournaments] = await pool.execute('SELECT * FROM Tournament WHERE tournament_id = ?', [tournamentId]) as [Event[], any];
+
+        // Check if the school was found
+        if (tournaments.length === 0) {
+            return res.status(404).json({ message: 'Tournament not found' });
+        }
+
+        res.status(200).json(tournaments[0]); // Return the first (and should be only) school found
+    } catch (error) {
+        console.error('Error retrieving tournament:', error);
+        res.status(500).json({ message: 'Error retrieving tournament', error: error.message });
+    }
+};
+

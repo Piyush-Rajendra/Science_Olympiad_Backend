@@ -39,8 +39,9 @@ export interface IEventHistory {
 }
 
 // models/scores.model.ts
-export interface IScores {
+export interface IScore {
   score_id: number;
+  score: number;
   event_id: number;
   school_id: number;
   tournament_id: number; 

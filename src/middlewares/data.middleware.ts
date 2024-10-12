@@ -72,8 +72,9 @@ export const createDataTables = async () => {
     `);
 
     await pool.execute(`
-        CREATE TABLE IF NOT EXISTS Scores (
+        CREATE TABLE IF NOT EXISTS Score (
             score_id INT AUTO_INCREMENT PRIMARY KEY,
+            score FLOAT,
             event_id INT,
             school_id INT,
             tournament_id INT,

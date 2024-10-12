@@ -166,3 +166,26 @@ export const deleteEvent = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Error deleting event', error: error.message });
     }
 };
+
+export const getEventById = async (req: Request, res: Response) => {
+    const eventId = parseInt(req.params.id); // Get tournament ID from the URL
+
+    if (isNaN(eventId)) {
+        return res.status(400).json({ message: 'Invalid event ID' });
+    }
+
+    try {
+        // Execute the select query
+        const [events] = await pool.execute('SELECT * FROM Event WHERE event_id = ?', [eventId]) as [Event[], any];
+
+        // Check if the school was found
+        if (events.length === 0) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        res.status(200).json(events[0]); // Return the first (and should be only) event found
+    } catch (error) {
+        console.error('Error retrieving event:', error);
+        res.status(500).json({ message: 'Error retrieving event', error: error.message });
+    }
+};
