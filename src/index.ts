@@ -14,6 +14,7 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(cors());
 app.use('/auth', authRoutes);
+//app.use()
 
 // Create tables before starting the server
 const startServer = async () => {
