@@ -2,8 +2,11 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import authRoutes from '../src/routes/auth.routes';
+import dataRoutes from '../src/routes/data.routes';
 import { createTables } from '.././src/middlewares/auth.middleware';
 import pool from '../config/db.config';
+import { createDataTables } from './middlewares/data.middleware';
+
 
 
 const app = express();
@@ -12,16 +15,29 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(cors());
 app.use('/auth', authRoutes);
+app.use(dataRoutes)
 
 // Create tables before starting the server
-createTables().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-}).catch(error => {
-  console.error('Error creating tables', error);
-  process.exit(1);
-});
+const startServer = async () => {
+  try {
+    // First create the regular tables
+    await createTables();
+
+    // Then create the data tables
+    await createDataTables();
+
+    // After both succeed, start the server
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Error starting the server:', error);
+    process.exit(1);  // Exit process on failure
+  }
+};
+
+startServer();
+
 
 process.on('uncaughtException', (error) => {
   console.error('Uncaught exception:', error.message);

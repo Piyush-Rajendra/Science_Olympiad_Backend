@@ -14,20 +14,22 @@ export interface ITournament {
   isCurrent: boolean;
   division: string;
   NumOfTimeBlocks: number;
-  score_id: number;
   name: string;
+  date:  Date;
+  location: String;
+  description: String; 
 }
 
 
 // models/event.model.ts
 export interface IEvent {
   event_id: number;
-  timeBlock_id: number;
-  width: number;
   name: string;
   location: string;
   eventSupervisor_id: number;
   tournament_id: number;
+  scoringAlg: String;
+  description: String; 
 }
 
 // models/eventHistory.model.ts
@@ -37,12 +39,15 @@ export interface IEventHistory {
 }
 
 // models/scores.model.ts
-export interface IScores {
+export interface IScore {
   score_id: number;
+  score: number;
   event_id: number;
   school_id: number;
-  ranking_id: number;
-  score: number;
+  tournament_id: number; 
+  school_group_id: number;
+  team_id: number;
+  is_reviewed: boolean; 
 }
 
 // models/rankings.model.ts
@@ -59,12 +64,31 @@ export interface ITimeBlock {
   startTime: Date;
   endTime: Date;
   event_id: number;
+  tournament_id: number;
+  building: String;
+  roomNumber: String;
 }
 
 // models/school.model.ts
 export interface ISchool {
   ID: number;
-  TimeBlock_ID: number;
-  School_ID: number;
-  SchoolName: string;
+  school_group_id: number;
+  name: String; 
+  flight: String; 
+}
+
+export interface ITeam {
+  ID: number;
+  school_id: number;
+  name: String; 
+  unique_id: String; 
+}
+
+export interface ITeamTimeBlock {
+  teamTimeBlock_id: number;
+  timeBlock_id: number;
+  team_id: number;
+  attend: boolean;
+  comment: String; 
+  tier: number; 
 }
