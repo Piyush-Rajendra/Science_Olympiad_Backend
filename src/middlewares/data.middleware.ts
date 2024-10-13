@@ -71,6 +71,36 @@ export const createDataTables = async () => {
         );
     `);
 
+    //Create TimeBlock Table
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS TimeBlock (
+            TimeBlock_ID INT AUTO_INCREMENT PRIMARY KEY,
+            Event_ID INT,
+            Tournament_ID INT,
+            TimeBegin DATETIME,
+            TimeEnd DATETIME,
+            Building TEXT,
+            RoomNumber INT,
+            FOREIGN KEY (Tournament_ID) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE,
+            FOREIGN KEY (Event_ID) REFERENCES Event(event_id) ON DELETE CASCADE ON UPDATE CASCADE
+        );
+    `);
+
+    //Create Team TimeBlock tables
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS TeamTimeBlock (
+            TeamTimeBlock_ID INT AUTO_INCREMENT PRIMARY KEY,
+            TimeBlock_ID INT,
+            Team_ID INT,
+            Attend BOOLEAN NOT NULL,
+            Comment TEXT,
+            Tier INT,
+            FOREIGN KEY (Team_ID) REFERENCES Team(team_id) ON DELETE CASCADE ON UPDATE CASCADE,
+            FOREIGN KEY (TimeBlock_ID) REFERENCES TimeBlock(TimeBlock_ID) ON DELETE CASCADE ON UPDATE CASCADE
+        );
+    `);
+
+
     await pool.execute(`
         CREATE TABLE IF NOT EXISTS Score (
             score_id INT AUTO_INCREMENT PRIMARY KEY,

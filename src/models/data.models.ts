@@ -64,6 +64,9 @@ export interface ITimeBlock {
   startTime: Date;
   endTime: Date;
   event_id: number;
+  tournament_id: number;
+  building: String;
+  roomNumber: String;
 }
 
 // models/school.model.ts
@@ -79,4 +82,13 @@ export interface ITeam {
   school_id: number;
   name: String; 
   unique_id: String; 
+}
+
+export interface ITeamTimeBlock {
+  teamTimeBlock_id: number;
+  timeBlock_id: number;
+  team_id: number;
+  attend: boolean;
+  comment: String; 
+  tier: number; 
 }
