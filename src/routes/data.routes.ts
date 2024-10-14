@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { addTournament, getAllTournaments, editTournament, deleteTournament, getTourneyById } from '../controllers/tournament.controller';
-import { addEvent, deleteEvent, editEvent, getAllEvents, getEventById, getEventsByEventSupervisorId, getEventsByTournamentId } from '../controllers/event.controller';
+import { addEvent, deleteEvent, editEvent, getAllEvents, getEventById, getEventsByEventSupervisorId, getEventsByTournamentId, addEventToEventSupervisor } from '../controllers/event.controller';
 import { addSchool, deleteSchool, editSchool, getAllSchools, getSchoolById } from '../controllers/school.controller';
 import { addTeam, deleteTeam, editTeam, getAllTeams, getTeamById, getTeamsBySchoolId } from '../controllers/team.controllers';
 import { addScore, deleteScore, editScore, getScoreById, getScoresByEventId, getScoresBySchoolGroupId, getScoresBySchoolId, getScoresByTeamId, getScoresByTournamentId } from '../controllers/score.controllers';
@@ -50,14 +50,12 @@ router.get('/get-score-by-team/:teamId', getScoresByTeamId);
 router.get('/get-score-by-school/:schoolId', getScoresBySchoolId);
 router.get('/get-score-by-school-group/:schoolGroupId', getScoresBySchoolGroupId);
 
-
-
-
-
-
-
-
-
+//Assignt Event 
+router.post('/add-EventSupervisorsEvent', addEventToEventSupervisor);
+router.delete('/delete-EventSuperVisorsEvent', deleteEventToEventSupervisor);
+router.get('/get-AllEventSupervisorsEvent/:schoolGroupID', getAllEventToEventSupervisorById);
+router.get('/get-EventSupervisorsEventBySupervisor/:eventSupervisorID', getAllEventToEventSupervisorBySupervisorId);
+router.put('/update-EventSupervisorsEvent/:eventSuperVisorEventID', updateEventSupervisorForEvent);
 
 
 export default router;

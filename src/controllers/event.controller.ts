@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import pool from '../../config/db.config';
-import { IEvent } from '../models/data.models'; // Adjust the import path
+import { IEvent, IEventSuperVisorEvent } from '../models/data.models'; // Adjust the import path
 
 export const addEvent = async (req: Request, res: Response) => {
     const { name, location, eventSupervisor_id, tournament_id, scoringAlg, description } = req.body;
@@ -189,3 +189,30 @@ export const getEventById = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Error retrieving event', error: error.message });
     }
 };
+
+export const addEventToEventSupervisor = async (req: Request, res: Response) => {
+  const {event_id, eventSupervisor_id} = req.body;
+  if(!event_id || !eventSupervisor_id) {
+    return res.status(400).json({message: 'No such Event Supervisor exist or event exist.'});
+  }
+
+  const newEventToEventSupervisor: IEventSuperVisorEvent = {
+    eventSuperVisorEvent_id: 0,
+    event_id,
+    eventSupervisor_id,
+  };
+  
+  try {
+    const [result] = await pool.execute ( 'INSERT INTO EventSuperVisorEvent (event_id, eventSupervisor_id) VALUES (?, ?)',
+      [
+        newEventToEventSupervisor.event_id,
+        newEventToEventSupervisor.eventSupervisor_id,
+      ]
+    )
+    res.status(201).json({ message: 'Event added successfully'});
+
+  } catch(error) {
+    console.error('Error adding event:', error);
+    res.status(500).json({ message: 'Error adding event', error: error.message });
+  }
+}

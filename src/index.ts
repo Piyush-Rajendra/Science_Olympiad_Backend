@@ -7,8 +7,6 @@ import { createTables } from '.././src/middlewares/auth.middleware';
 import pool from '../config/db.config';
 import { createDataTables } from './middlewares/data.middleware';
 
-
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
