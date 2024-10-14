@@ -35,12 +35,14 @@ export const createTables = async () => {
       CREATE TABLE IF NOT EXISTS eventsupervisor (
           eventSupervisor_id INT AUTO_INCREMENT PRIMARY KEY,
           school_group_id INT,
-          name VARCHAR(255) NOT NULL,
-          schoolGroup_id INT NOT NULL,
-          firstname VARCHAR(255) NOT NULL,
-          lastname VARCHAR(255) NOT NULL,
+          firstName VARCHAR(255) NOT NULL,
+          lastName VARCHAR(255) NOT NULL,
+          email VARCHAR(255) NOT NULL,
+          username VARCHAR(255) NOT NULL,
           password VARCHAR(255) NOT NULL,
-          FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) 
+          eventSuperVisorEvents_id INT,
+          FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id),
+          FOREIGN KEY (eventSuperVisorEvents_id) REFERENCES EventSuperVisorEvent(eventSuperVisorEvent_id) ON DELETE CASCADE ON UPDATE CASCADE
         )
     `);
     

@@ -1,7 +1,7 @@
 
   export interface IEventSupervisor {
     eventSupervisor_id: number;
-    schoolgroup_id: number | null;
+    school_group_id: number | null;
     firstName: string,
     lastName: string,
     email: string;

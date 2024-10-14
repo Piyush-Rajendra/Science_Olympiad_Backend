@@ -310,9 +310,8 @@ export const getAdminById = async (req: Request, res: Response) => {
 
 
 // Event Supervisor
-
 export const registerEventSupervisor = async (req: Request, res: Response) => {
-  const { schoolgroup_id, email, username, password,firstName,lastName,eventSuperVisorEvents_id } = req.body;
+  const { school_group_id, email, username, password,firstName,lastName,eventSuperVisorEvents_id } = req.body;
 
   if (!email || !username || !password) {
     return res.status(400).json({ message: 'Email, username, and password are required' });
@@ -322,7 +321,7 @@ export const registerEventSupervisor = async (req: Request, res: Response) => {
 
   const newEventSupervisor: IEventSupervisor = {
     eventSupervisor_id: 0,
-    schoolgroup_id,
+    school_group_id,
     firstName,
     lastName,
     eventSuperVisorEvents_id,
@@ -332,8 +331,8 @@ export const registerEventSupervisor = async (req: Request, res: Response) => {
   };
 
   try {
-    await pool.execute('INSERT INTO eventSupervisors (schoolgroup_id, email, username, password, firstName, lastName, eventSueprVisorEvents) VALUES (?, ?, ?, ?, ?, ?, ?)', [
-      newEventSupervisor.schoolgroup_id,
+    await pool.execute('INSERT INTO eventsupervisor (school_group_id, email, username, password,firstName,lastName,eventSuperVisorEvents_id) VALUES (?, ?, ?, ?, ?, ?, ?)', [
+      newEventSupervisor.school_group_id,
       newEventSupervisor.email,
       newEventSupervisor.username,
       newEventSupervisor.password,
@@ -356,7 +355,7 @@ export const loginEventSupervisor = async (req: Request, res: Response) => {
   }
 
   try {
-    const [rows]: any = await pool.execute('SELECT * FROM eventSupervisors WHERE username = ?', [username]);
+    const [rows]: any = await pool.execute('SELECT * FROM eventsupervisor WHERE username = ?', [username]);
 
     if (rows.length === 0) {
       return res.status(401).json({ message: 'Invalid credentials' });
@@ -380,7 +379,7 @@ export const loginEventSupervisor = async (req: Request, res: Response) => {
 
 export const getAllEventSupervisors = async (req: Request, res: Response) => {
   try {
-    const [rows]: any = await pool.execute('SELECT schoolgroup_id, email, username, password,firstName,lastName,eventSuperVisorEvents_id FROM eventSupervisors');
+    const [rows]: any = await pool.execute('SELECT school_group_id, email, username, password,firstName,lastName,eventSuperVisorEvents_id FROM eventsupervisor');
     res.status(200).json(rows);
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving event supervisors', error });
@@ -388,7 +387,7 @@ export const getAllEventSupervisors = async (req: Request, res: Response) => {
 };
 
 export const updateEventSupervisor = async (req: Request, res: Response) => {
-  const { eventSupervisor_id, schoolgroup_id, email, username, password,firstName,lastName,eventSuperVisorEvents_id} = req.body;
+  const { eventSupervisor_id, school_group_id, email, username, password,firstName,lastName,eventSuperVisorEvents_id} = req.body;
 
   if (!eventSupervisor_id) {
     return res.status(400).json({ message: 'Event Supervisor ID is required' });
@@ -397,8 +396,8 @@ export const updateEventSupervisor = async (req: Request, res: Response) => {
   try {
     const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
     
-    await pool.execute('UPDATE eventSupervisors SET group_id = ?, email = ?, username = ?, password = ? WHERE eventSupervisor_id = ?', [
-      schoolgroup_id,
+    await pool.execute('UPDATE eventsupervisor SET group_id = ?, email = ?, username = ?, password = ? WHERE eventSupervisor_id = ?', [
+      school_group_id,
       firstName,
       lastName,
       email,
@@ -421,7 +420,7 @@ export const deleteEventSupervisor = async (req: Request, res: Response) => {
   }
 
   try {
-    const [result] = await pool.execute('DELETE FROM eventSupervisors WHERE eventSupervisor_id = ?', [id]);
+    const [result] = await pool.execute('DELETE FROM eventsupervisor WHERE eventSupervisor_id = ?', [id]);
 
     if (!result) {
       return res.status(404).json({ message: 'User not found' });
@@ -437,11 +436,11 @@ export const getEventSupervisorById = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   if (!id) {
-    return res.status(400).json({ message: 'eventSupervisors ID is required' });
+    return res.status(400).json({ message: 'eventsupervisor ID is required' });
   }
 
   try {
-    const [rows]: any = await pool.execute('SELECT * FROM eventSupervisors WHERE eventSupervisor_id = ?', [id]);
+    const [rows]: any = await pool.execute('SELECT * FROM eventsupervisor WHERE eventSupervisor_id = ?', [id]);
 
     if (rows.length === 0) {
       return res.status(404).json({ message: 'User not found' });
