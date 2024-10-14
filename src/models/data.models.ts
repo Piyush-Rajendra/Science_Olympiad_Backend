@@ -77,6 +77,7 @@ export interface ISchool {
   flight: String; 
 }
 
+// models/team.model.ts
 export interface ITeam {
   ID: number;
   school_id: number;
@@ -84,6 +85,7 @@ export interface ITeam {
   unique_id: String; 
 }
 
+// models/teamTimeBlock.model.ts
 export interface ITeamTimeBlock {
   teamTimeBlock_id: number;
   timeBlock_id: number;
@@ -91,4 +93,11 @@ export interface ITeamTimeBlock {
   attend: boolean;
   comment: String; 
   tier: number; 
+}
+
+// models/eventSuperVisorEvent.model.ts
+export interface IEventSuperVisorEvent {
+  eventSuperVisorEvent_id: number;
+  event_id: number;
+  eventSupervisor_id: number;
 }
