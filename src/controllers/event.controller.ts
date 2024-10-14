@@ -216,3 +216,99 @@ export const addEventToEventSupervisor = async (req: Request, res: Response) => 
     res.status(500).json({ message: 'Error adding event', error: error.message });
   }
 }
+
+export const getEventsByEventSupervisor = async (req: Request, res: Response) => {
+    const eventSupervisorId = parseInt(req.params.id);
+
+    if (isNaN(eventSupervisorId)) {
+        return res.status(400).json({ message: 'Invalid event supervisor ID' });
+    }
+
+    try {
+        const [events] = await pool.execute(
+            'SELECT * FROM EventSuperVisorEvent WHERE eventSupervisor_id = ?',
+            [eventSupervisorId]
+        ) as [any[], any];
+
+        if (events.length === 0) {
+            return res.status(404).json({ message: 'No events found for this event supervisor' });
+        }
+
+        res.status(200).json(events);
+    } catch (error) {
+        console.error('Error retrieving events:', error);
+        res.status(500).json({ message: 'Error retrieving events', error: error.message });
+    }
+};
+
+export const removeEventFromEventSupervisor = async (req: Request, res: Response) => {
+    const { event_id, eventSupervisor_id } = req.body;
+
+    if (!event_id || !eventSupervisor_id) {
+        return res.status(400).json({ message: 'Missing event ID or event supervisor ID' });
+    }
+
+    try {
+        const [result] = await pool.execute(
+            'DELETE FROM EventSuperVisorEvent WHERE event_id = ? AND eventSupervisor_id = ?',
+            [event_id, eventSupervisor_id]
+        ) as [any, any];
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'No such event-supervisor relation found' });
+        }
+
+        res.status(200).json({ message: 'Event removed from event supervisor successfully' });
+    } catch (error) {
+        console.error('Error removing event from event supervisor:', error);
+        res.status(500).json({ message: 'Error removing event', error: error.message });
+    }
+};
+
+export const updateEventForEventSupervisor = async (req: Request, res: Response) => {
+    const { eventSuperVisorEvent_id, event_id, eventSupervisor_id } = req.body;
+
+    if (!eventSuperVisorEvent_id || !event_id || !eventSupervisor_id) {
+        return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    try {
+        const [result] = await pool.execute(
+            'UPDATE EventSuperVisorEvent SET event_id = ?, eventSupervisor_id = ? WHERE eventSuperVisorEvent_id = ?',
+            [event_id, eventSupervisor_id, eventSuperVisorEvent_id]
+        ) as [any, any];
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'EventSupervisorEvent not found or no update made' });
+        }
+
+        res.status(200).json({ message: 'EventSupervisorEvent updated successfully' });
+    } catch (error) {
+        console.error('Error updating event-supervisor relation:', error);
+        res.status(500).json({ message: 'Error updating event-supervisor relation', error: error.message });
+    }
+};
+
+export const getEventSupervisorEventById = async (req: Request, res: Response) => {
+    const eventSuperVisorEventId = parseInt(req.params.id);
+
+    if (isNaN(eventSuperVisorEventId)) {
+        return res.status(400).json({ message: 'Invalid event-supervisor event ID' });
+    }
+
+    try {
+        const [eventSupervisorEvent] = await pool.execute(
+            'SELECT * FROM EventSuperVisorEvent WHERE eventSuperVisorEvent_id = ?',
+            [eventSuperVisorEventId]
+        ) as [any[], any];
+
+        if (eventSupervisorEvent.length === 0) {
+            return res.status(404).json({ message: 'Event supervisor event not found' });
+        }
+
+        res.status(200).json(eventSupervisorEvent[0]);
+    } catch (error) {
+        console.error('Error retrieving event-supervisor event:', error);
+        res.status(500).json({ message: 'Error retrieving event-supervisor event', error: error.message });
+    }
+};
