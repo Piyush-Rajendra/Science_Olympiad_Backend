@@ -1,7 +1,9 @@
 
   export interface IEventSupervisor {
     eventSupervisor_id: number;
-    group_id: number | null;
+    school_group_id: number | null;
+    firstName: string,
+    lastName: string,
     email: string;
     username: string;
     password: string;
@@ -18,8 +20,9 @@
 
   export interface IAdmin {
     admin_id: number;
-    group_id: number | null;
-    isPresident: boolean;
+    school_group_id: number | null;
+    firstName: string;
+    lastName: string;
     email: string;
     username: string;
     password: string;

@@ -2,6 +2,7 @@ import pool from '../../config/db.config';
 
 export const createTables = async () => {
   try {
+    // Create Superadmin Table
     await pool.execute(`
       CREATE TABLE IF NOT EXISTS superadmin (
         _superadmin_id INT AUTO_INCREMENT,
@@ -13,6 +14,7 @@ export const createTables = async () => {
         PRIMARY KEY (_superadmin_id)
       )
     `);
+    
     console.log('Tables created successfully');
   } catch (error) {
     console.error('Error creating tables', error);

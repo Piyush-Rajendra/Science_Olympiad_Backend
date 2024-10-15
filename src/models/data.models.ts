@@ -1,6 +1,4 @@
-
-
-  export interface eventSupervisorsEvent {
+export interface eventSupervisorsEvent {
     eventSupervisorsEvent_id: number
     event_id: number
     EventSupervisorId: number
@@ -67,6 +65,7 @@ export interface ITimeBlock {
   tournament_id: number;
   building: String;
   roomNumber: String;
+  status: number;
 }
 
 // models/school.model.ts
@@ -77,6 +76,7 @@ export interface ISchool {
   flight: String; 
 }
 
+// models/team.model.ts
 export interface ITeam {
   ID: number;
   school_id: number;
@@ -84,6 +84,7 @@ export interface ITeam {
   unique_id: String; 
 }
 
+// models/teamTimeBlock.model.ts
 export interface ITeamTimeBlock {
   teamTimeBlock_id: number;
   timeBlock_id: number;
@@ -91,4 +92,18 @@ export interface ITeamTimeBlock {
   attend: boolean;
   comment: String; 
   tier: number; 
+}
+
+// models/eventSuperVisorEvent.model.ts
+export interface IEventSuperVisorEvent {
+  eventSuperVisorEvent_id: number;
+  event_id: number;
+  eventSupervisor_id: number;
+}
+
+// modes/schoolGroup.mode.ts
+
+export interface ISchoolGroup {
+  schoolgroup_id: number;
+  name: string;
 }
