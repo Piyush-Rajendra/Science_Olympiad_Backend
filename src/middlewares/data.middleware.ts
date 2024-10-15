@@ -155,8 +155,8 @@ export const createDataTables = async () => {
             tournament_history_id INT AUTO_INCREMENT PRIMARY KEY,
             tournament_id INT,
             school_group_id INT,
-            excelmasterscore TEXT
-            FOREIGN KEY (tournament_id) REFERENCES Tournament (tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
+            excelmasterscore TEXT,
+            FOREIGN KEY (tournament_id) REFERENCES Tournament (tournament_id) ON DELETE CASCADE ON UPDATE CASCADE,
             FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE
         )
     `);

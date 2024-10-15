@@ -1,6 +1,4 @@
-
-
-  export interface eventSupervisorsEvent {
+export interface eventSupervisorsEvent {
     eventSupervisorsEvent_id: number
     event_id: number
     EventSupervisorId: number
@@ -67,6 +65,7 @@ export interface ITimeBlock {
   tournament_id: number;
   building: String;
   roomNumber: String;
+  status: number;
 }
 
 // models/school.model.ts
@@ -100,4 +99,11 @@ export interface IEventSuperVisorEvent {
   eventSuperVisorEvent_id: number;
   event_id: number;
   eventSupervisor_id: number;
+}
+
+// modes/schoolGroup.mode.ts
+
+export interface ISchoolGroup {
+  schoolgroup_id: number;
+  name: string;
 }
