@@ -6,7 +6,7 @@ export const createTables = async () => {
         CREATE TABLE IF NOT EXISTS ResourceLibrary (
             resourceLibrary_id INT AUTO_INCREMENT PRIMARY KEY,
             schoolGroup_id INT NOT NULL,
-            pdf_input VARCHAR(255) NOT NULL,
+            pdf_input LONGBLOB NOT NULL,
             FOREIGN KEY (schoolGroup_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
     `);
