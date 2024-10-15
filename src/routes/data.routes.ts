@@ -4,6 +4,8 @@ import { getEventSupervisorEventById, updateEventForEventSupervisor, removeEvent
 import { addSchool, deleteSchool, editSchool, getAllSchools, getSchoolById } from '../controllers/school.controller';
 import { addTeam, deleteTeam, editTeam, getAllTeams, getTeamById, getTeamsBySchoolId } from '../controllers/team.controllers';
 import { addScore, deleteScore, editScore, getScoreById, getScoresByEventId, getScoresBySchoolGroupId, getScoresBySchoolId, getScoresByTeamId, getScoresByTournamentId } from '../controllers/score.controllers';
+import { addTimeblocks, editTimeblock, deleteTimeblock, getTimeblocksByEventId, getTimeblocksByTournamentId, addTeamTimeblock, editTeamTimeblock, deleteTeamTimeblock, getTeamTimeblocksByTeamId, getTeamTimeblocskByTimeblockId } from '../controllers/timeblock.controller'
+import { addSchoolGroup, deleteSchoolGroup, editSchoolGroup, getAllSchoolGroups } from '../controllers/schoolgroups.controllers'
 
 
 const router = Router();
@@ -56,6 +58,26 @@ router.delete('/delete-EventSuperVisorsEvent', removeEventFromEventSupervisor);
 router.get('/get-event-supervisor/:id/events', getEventsByEventSupervisor);
 router.get('/get-event-supervisor-event/:id', getEventSupervisorEventById);
 router.put('/update-EventSupervisorsEvent/:eventSuperVisorEventID', updateEventForEventSupervisor);
+
+// Timeblock
+router.post('/add-timeblocks', addTimeblocks);
+router.put('/edit-timeblock/:id', editTimeblock);
+router.delete('/delete-timeblock/:id', deleteTimeblock);
+router.get('/get-timeblock-by-event/:id', getTimeblocksByEventId);
+router.get('/get-timeblocks-by-tournament/:id', getTimeblocksByTournamentId);
+
+// Team Timeblocks
+router.post('/add-team-timeblock', addTeamTimeblock);
+router.put('/edit-team-timeblock/:id', editTeamTimeblock);
+router.delete('/delete-team-timeblock/:id', deleteTeamTimeblock);
+router.get('/get-team-timeblocks-by-team/:id', getTeamTimeblocksByTeamId);
+router.get('/get-team-timeblocks-by-timeblock/:id', getTeamTimeblocskByTimeblockId);
+
+// School Groups
+router.post('/add-schoolgroup', addSchoolGroup);
+router.put('/edit-schoolgroup/:id', editSchoolGroup);
+router.delete('/delete-schoolgroup/:id', deleteSchoolGroup);
+router.get('/get-schoolgroups-all', getAllSchoolGroups);
 
 
 export default router;

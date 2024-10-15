@@ -149,6 +149,18 @@ export const createDataTables = async () => {
         );
     `);
 
+    // Create Tournament History
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS TournamentHistory (
+            tournament_history_id INT AUTO_INCREMENT PRIMARY KEY,
+            tournament_id INT,
+            school_group_id INT,
+            excelmasterscore TEXT
+            FOREIGN KEY (tournament_id) REFERENCES Tournament (tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
+            FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE
+        )
+    `);
+
 
     console.log('Tables created successfully');
   } catch (error) {
