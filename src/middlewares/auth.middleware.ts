@@ -40,9 +40,7 @@ export const createTables = async () => {
           email VARCHAR(255) NOT NULL,
           username VARCHAR(255) NOT NULL,
           password VARCHAR(255) NOT NULL,
-          eventSuperVisorEvents_id INT,
-          FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id),
-          FOREIGN KEY (eventSuperVisorEvents_id) REFERENCES EventSuperVisorEvent(eventSuperVisorEvent_id) ON DELETE CASCADE ON UPDATE CASCADE
+          FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id)
         )
     `);
     
