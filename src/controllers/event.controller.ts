@@ -312,3 +312,43 @@ export const getEventSupervisorEventById = async (req: Request, res: Response) =
         res.status(500).json({ message: 'Error retrieving event-supervisor event', error: error.message });
     }
 };
+
+export const getTimeBlocksByEventId = async (req: Request, res: Response) => {
+  const { eventId } = req.params;
+
+  try {
+    const [timeBlocks] = await pool.execute(
+      `SELECT * FROM TimeBlock WHERE Event_ID = ?`, [eventId]
+    )as [any[], any];
+
+    if (timeBlocks.length === 0) {
+      return res.status(404).json({ message: 'No time blocks found for this event' });
+    }
+
+    res.status(200).json(timeBlocks);
+  } catch (error) {
+    console.error('Error fetching time blocks by event ID', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const getTeamsByTimeBlockId = async (req: Request, res: Response) => {
+  const { timeBlockId } = req.params;
+
+  try {
+    const [teams] = await pool.execute(
+      `SELECT t.* FROM Team t
+       JOIN TeamTimeBlock ttb ON t.team_id = ttb.Team_ID
+       WHERE ttb.TimeBlock_ID = ?`, [timeBlockId]
+    ) as [any[], any];;
+
+    if (teams.length === 0) {
+      return res.status(404).json({ message: 'No teams found for this time block' });
+    }
+
+    res.status(200).json(teams);
+  } catch (error) {
+    console.error('Error fetching teams by time block ID', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
