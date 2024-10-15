@@ -311,7 +311,7 @@ export const getAdminById = async (req: Request, res: Response) => {
 
 // Event Supervisor
 export const registerEventSupervisor = async (req: Request, res: Response) => {
-  const { school_group_id, email, username, password,firstName,lastName,eventSuperVisorEvents_id } = req.body;
+  const { school_group_id, email, username, password,firstName,lastName } = req.body;
 
   if (!email || !username || !password) {
     return res.status(400).json({ message: 'Email, username, and password are required' });
@@ -324,21 +324,19 @@ export const registerEventSupervisor = async (req: Request, res: Response) => {
     school_group_id,
     firstName,
     lastName,
-    eventSuperVisorEvents_id,
     email,
     username,
     password: hashedPassword,
   };
 
   try {
-    await pool.execute('INSERT INTO eventsupervisor (school_group_id, email, username, password,firstName,lastName,eventSuperVisorEvents_id) VALUES (?, ?, ?, ?, ?, ?, ?)', [
+    await pool.execute('INSERT INTO eventsupervisor (school_group_id, email, username, password,firstName,lastName) VALUES (?, ?, ?, ?, ?, ?)', [
       newEventSupervisor.school_group_id,
       newEventSupervisor.email,
       newEventSupervisor.username,
       newEventSupervisor.password,
       newEventSupervisor.firstName,
       newEventSupervisor.lastName,
-      newEventSupervisor.eventSuperVisorEvents_id,
     ]);
 
     res.status(200).json({ message: 'Event Supervisor registered successfully' });
@@ -379,7 +377,7 @@ export const loginEventSupervisor = async (req: Request, res: Response) => {
 
 export const getAllEventSupervisors = async (req: Request, res: Response) => {
   try {
-    const [rows]: any = await pool.execute('SELECT school_group_id, email, username, password,firstName,lastName,eventSuperVisorEvents_id FROM eventsupervisor');
+    const [rows]: any = await pool.execute('SELECT school_group_id, email, username, password,firstName,lastName FROM eventsupervisor');
     res.status(200).json(rows);
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving event supervisors', error });
@@ -387,7 +385,7 @@ export const getAllEventSupervisors = async (req: Request, res: Response) => {
 };
 
 export const updateEventSupervisor = async (req: Request, res: Response) => {
-  const { eventSupervisor_id, school_group_id, email, username, password,firstName,lastName,eventSuperVisorEvents_id} = req.body;
+  const { eventSupervisor_id, school_group_id, email, username, password,firstName,lastName} = req.body;
 
   if (!eventSupervisor_id) {
     return res.status(400).json({ message: 'Event Supervisor ID is required' });
@@ -402,8 +400,7 @@ export const updateEventSupervisor = async (req: Request, res: Response) => {
       lastName,
       email,
       username,
-      hashedPassword,
-      eventSuperVisorEvents_id
+      hashedPassword
     ]);
 
     res.status(200).json({ message: 'Event Supervisor updated successfully' });

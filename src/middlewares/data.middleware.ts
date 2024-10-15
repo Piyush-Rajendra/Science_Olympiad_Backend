@@ -10,6 +10,35 @@ export const createDataTables = async () => {
         );
     `);
 
+    // Create Admin Table
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS admin (
+        admin_id INT AUTO_INCREMENT PRIMARY KEY,
+        school_group_id INT,       
+        email VARCHAR(255) NOT NULL,
+        firstname VARCHAR(255) NOT NULL,
+        lastname VARCHAR(255) NOT NULL,
+        username VARCHAR(255) NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        isTournamentDirector BOOLEAN NOT NULL DEFAULT FALSE,
+        FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) 
+      )
+    `);
+
+    // Create EventSupervisor table
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS eventsupervisor (
+          eventSupervisor_id INT AUTO_INCREMENT PRIMARY KEY,
+          school_group_id INT,
+          firstName VARCHAR(255) NOT NULL,
+          lastName VARCHAR(255) NOT NULL,
+          email VARCHAR(255) NOT NULL,
+          username VARCHAR(255) NOT NULL,
+          password VARCHAR(255) NOT NULL,
+          FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id)
+        )
+    `);
+
     // Create School table
     await pool.execute(`
         CREATE TABLE IF NOT EXISTS School (
@@ -54,11 +83,9 @@ export const createDataTables = async () => {
             event_id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             location VARCHAR(255) NOT NULL,
-            eventSupervisor_id INT,
             tournament_id INT,
             scoringAlg VARCHAR(255) NOT NULL,
             description TEXT,
-            FOREIGN KEY (eventSupervisor_id) REFERENCES EventSupervisor(eventSupervisor_id) ON DELETE SET NULL ON UPDATE CASCADE,
             FOREIGN KEY (tournament_id) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
     `);
