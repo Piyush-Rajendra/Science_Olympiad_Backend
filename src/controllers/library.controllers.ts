@@ -33,13 +33,27 @@ app.post('/upload-pdf', upload.single('pdf'), async (req: Request, res: Response
     // Get the binary data from the file
     const pdfData = pdfFile.buffer;
 
-    // Store the file in the database
-    const [result] = await pool.execute(
-      'INSERT INTO resource_library (schoolGroup_id, pdf_input) VALUES (?, ?)',
-      [schoolGroup_id, pdfData]
-    );
+    // Check if a record already exists for this schoolGroup_id
+    const [existingRecord] = await pool.execute(
+      'SELECT * FROM resource_library WHERE schoolGroup_id = ?',
+      [schoolGroup_id]
+    ) as any[];
 
-    res.status(201).json({ message: 'PDF uploaded successfully', id: (result as any).insertId });
+    if (existingRecord.length > 0) {
+      // Update the existing record with the new PDF
+      await pool.execute(
+        'UPDATE resource_library SET pdf_input = ? WHERE schoolGroup_id = ?',
+        [pdfData, schoolGroup_id]
+      );
+      res.status(200).json({ message: 'PDF updated successfully' });
+    } else {
+      // Insert a new record if none exists
+      const [result] = await pool.execute(
+        'INSERT INTO resource_library (schoolGroup_id, pdf_input) VALUES (?, ?)',
+        [schoolGroup_id, pdfData]
+      );
+      res.status(201).json({ message: 'PDF uploaded successfully', id: (result as any).insertId });
+    }
   } catch (error) {
     console.error('Error uploading PDF:', error);
     res.status(500).json({ message: 'Error uploading PDF', error: error.message });
