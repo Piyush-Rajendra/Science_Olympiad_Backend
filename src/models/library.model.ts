@@ -1,7 +1,7 @@
  export interface IResourceLibrary {
     resourceLibrary_id: number;
     schoolGroup_id: number;
-    pdf_input: String; 
+    pdf_input: Buffer; 
   }
 
   export interface IQandA {
