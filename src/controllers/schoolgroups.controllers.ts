@@ -63,7 +63,7 @@ export const editSchoolGroup = async (req: Request, res: Response) => {
     if (!School_ID) {
         return res.status(400).json ({ message: 'Group is required'})
     }
-    const name = req.body;
+    const { name } = req.body;
     if (!name) {
         return res.status(400).json({ message: 'name required'})
     }
@@ -78,6 +78,7 @@ export const editSchoolGroup = async (req: Request, res: Response) => {
                 return res.status(404).json({ message: 'Schoolgroup id not found'})
             }
         }
+        res.status(200).json({ message: 'School group updated successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Error editing SchoolGroup '});
     }
