@@ -385,3 +385,24 @@ export const getEventsBySupervisorAndTournamentId = async (req: Request, res: Re
     }
 };
 
+export const getTotalAbsentByEvent = async (req: Request, res: Response) => {
+    try {
+        const { eventId } = req.params;
+
+        // SQL query to get the count of team time blocks where Attend is false
+        const [rows] = await pool.execute(
+            `SELECT COUNT(*) as count 
+             FROM TeamTimeBlock 
+             WHERE event_id = ? AND Attend = false`,
+            [eventId]
+        );
+
+        // Send the count back in the response
+        const count = (rows as any)[0]?.count || 0;
+        res.json({ count });
+    } catch (error) {
+        console.error('Error getting absent team count:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
