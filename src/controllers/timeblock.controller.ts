@@ -12,10 +12,10 @@ export const addTimeblocks = async (req: Request, res: Response) => {
 
     try {
 
-        const startInTime = startTime.getTime();
+        const startInTime = new Date(startTime).getTime();
         for (let i = 0; i < amount; i++) {
             const newStart = new Date(startInTime + (i * duration) + (i * breakTime));
-            const newEnd = new Date(newStart.getTime() + (i * duration));
+            const newEnd = new Date(newStart.getTime() + (duration));
 
             const newTimeblock: ITimeBlock = {
                 timeBlock_id: 0,
@@ -29,19 +29,20 @@ export const addTimeblocks = async (req: Request, res: Response) => {
             }
 
             await pool.execute(
-                'INSERT INTO timeblocks (TimeBlock_ID, Event_ID, Tournament_ID, TimeBegin, TimeEnd, Building, RoomNumber, Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                'INSERT INTO TimeBlock (TimeBlock_ID, Event_ID, Tournament_ID, TimeBegin, TimeEnd, Building, RoomNumber, Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                 [
                     newTimeblock.timeBlock_id,
-                    newTimeblock.startTime,
-                    newTimeblock.endTime,
                     newTimeblock.event_id,
                     newTimeblock.tournament_id,
+                    newTimeblock.startTime,
+                    newTimeblock.endTime,
                     newTimeblock.building,
                     newTimeblock.roomNumber,
                     newTimeblock.status
                 ]
             )
         }
+        res.status(201).json({ message: 'Timeblock created successfully' });
 
     } catch (error) {
         res.status(500).json({ message: 'Error adding timeblocks', error });
@@ -60,7 +61,7 @@ export const editTimeblock = async (req: Request, res: Response) => {
     try {
 
         const [update] = await pool.execute(
-            'UPDATE timeblocks SET TimeBegin = ?, TimeEnd = ?, Event_ID = ?, Tournament_ID = ?, Building = ?, RoomNumber = ?, Status = ? WHERE TimeBlock_ID = ?', 
+            'UPDATE TimeBlock SET TimeBegin = ?, TimeEnd = ?, Event_ID = ?, Tournament_ID = ?, Building = ?, RoomNumber = ?, Status = ? WHERE TimeBlock_ID = ?', 
             [startTime, endTime, event_id, tournament_id, building, roomNumber, id, status ]
         )
 
@@ -69,6 +70,8 @@ export const editTimeblock = async (req: Request, res: Response) => {
                 return res.status(404).json({ message: 'Timeblock id not found'})
             }
         }
+        res.status(200).json({ message: 'Edit timeblock successful' });
+
 
     } catch (error) {
         res.status(500).json({ message: 'Error editing timeblock '});
@@ -85,15 +88,16 @@ export const deleteTimeblock = async (req: Request, res: Response) => {
 
     try {
 
-        const [check]: any = await pool.execute('SELECT * FROM timeblocks WHERE TimeBlock_ID = ?', [id]);
+        const [check]: any = await pool.execute('SELECT * FROM TimeBlock WHERE TimeBlock_ID = ?', [id]);
 
         if (check.length === 0) {
             return res.status(401).json({ message: 'Timeblock does not exist' });
         }
 
-        pool.execute('DELETE FROM timeblocks WHERE TimeBlock_ID = ?', [id]);
-        pool.execute('DELETE FROM teamtimeblocks WHERE TimeBlock_ID = ?', [id]);
+        pool.execute('DELETE FROM TimeBlock WHERE TimeBlock_ID = ?', [id]);
+        pool.execute('DELETE FROM TeamTimeBlock WHERE TimeBlock_ID = ?', [id]);
 
+        res.status(200).json({ message: 'Delete timeblock successful' });
     } catch (error) {
         res.status(500).json({ message: 'Error deleting timeblock', error});
     }
@@ -108,7 +112,7 @@ export const getTimeblocksByEventId = async (req: Request, res: Response) => {
     }
 
     try {
-        const [check]: any = await pool.execute('SELECT * FROM timeblocks WHERE Event_ID = ?', [id]);
+        const [check]: any = await pool.execute('SELECT * FROM TimeBlock WHERE Event_ID = ?', [id]);
         if (check.length === 0) {
             return res.status(401).json({ message: 'Timeblock does not exist' });
         }
@@ -128,7 +132,7 @@ export const getTimeblocksByTournamentId = async (req: Request, res: Response) =
     }
 
     try {
-        const [check]: any = await pool.execute('SELECT * FROM timeblocks WHERE Tournament_ID = ?', [id]);
+        const [check]: any = await pool.execute('SELECT * FROM TimeBlock WHERE Tournament_ID = ?', [id]);
         if (check.length === 0) {
             return res.status(401).json({ message: 'Timeblock does not exist' });
         }
@@ -184,7 +188,7 @@ export const addTeamTimeblock = async (req: Request, res: Response) => {
 
     try {
         const [result] = await pool.execute(
-            'INSERT INTO teamtimeblocks (TeamTimeBlock_ID, TimeBlock_ID, Team_ID, Attend, Comment, Tier) VALUES (?, ?, ?, ?, ?, ?)', 
+            'INSERT INTO TeamTimeBlock (TeamTimeBlock_ID, TimeBlock_ID, Team_ID, Attend, Comment, Tier) VALUES (?, ?, ?, ?, ?, ?)', 
             [
                 newTeamTimeblock.teamTimeBlock_id,
                 newTeamTimeblock.timeBlock_id,
@@ -194,6 +198,8 @@ export const addTeamTimeblock = async (req: Request, res: Response) => {
                 newTeamTimeblock.tier
             ]
         )
+        res.status(201).json({ message: ' Team Timeblock added'});
+
     } catch (error) {
         res.status(500).json({ message: 'Error adding team timeblock '});
     }
@@ -211,7 +217,7 @@ export const editTeamTimeblock = async (req: Request, res: Response) => {
     try {
 
         const [update] = await pool.execute(
-            'UPDATE teamtimeblocks SET TeamTimeBlock_ID = ?, TimeBlock_ID = ?, Team_ID = ?, Attend = ?, Comment = ?, Tier = ?',
+            'UPDATE TeamTimeBlock SET TeamTimeBlock_ID = ?, TimeBlock_ID = ?, Team_ID = ?, Attend = ?, Comment = ?, Tier = ?',
             [id, timeblock_id, team_id, attend, comment, tier]
         )
 
@@ -220,6 +226,7 @@ export const editTeamTimeblock = async (req: Request, res: Response) => {
                 return res.status(404).json({ message: 'Team timeblock id not found'})
             }
         }
+        res.status(200).json({ message: ' Team Timeblock edited'});
 
     } catch (error) {
         res.status(500).json({ message: 'Error editing team timeblock '});
@@ -235,13 +242,15 @@ export const deleteTeamTimeblock = async (req: Request, res: Response) => {
     }
 
     try {
-        const [check]: any = await pool.execute('SELECT * FROM teamtimeblocks WHERE TeamTimeBlock_ID = ?', [id]);
+        const [check]: any = await pool.execute('SELECT * FROM TeamTimeBlock WHERE TeamTimeBlock_ID = ?', [id]);
 
         if (check.length === 0) {
             return res.status(401).json({ message: 'Team Timeblock does not exist' });
         }
 
-        pool.execute('DELETE FROM teamtimeblocks WHERE TeamTimeBlock_ID = ?', [id]);
+        pool.execute('DELETE FROM TeamTimeBlock WHERE TeamTimeBlock_ID = ?', [id]);
+
+        res.status(201).json({ message: ' Team Timeblock deleted'});
 
     } catch (error) {
         res.status(500).json({ message: 'Error deleting team timeblock', error });
@@ -257,7 +266,7 @@ export const getTeamTimeblocksByTeamId = async (req: Request, res: Response) => 
 
     try {
         const [check]: any = await pool.execute(
-            'SELECT * FROM teamtimeblocks WHERE Team_ID = ?', [id]
+            'SELECT * FROM TeamTimeBlock WHERE Team_ID = ?', [id]
         );
 
         if (check.length === 0) {
@@ -280,7 +289,7 @@ export const getTeamTimeblocskByTimeblockId = async (req: Request, res: Response
 
     try {
         const [check]: any = await pool.execute(
-            'SELECT * FROM teamtimeblocks WHERE TimeBlock_ID = ?', [id]
+            'SELECT * FROM TeamTimeBlock WHERE TimeBlock_ID = ?', [id]
         );
 
         if (check.length === 0) {

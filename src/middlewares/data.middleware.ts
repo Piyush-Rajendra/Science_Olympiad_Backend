@@ -100,6 +100,7 @@ export const createDataTables = async () => {
             TimeEnd DATETIME,
             Building TEXT,
             RoomNumber INT,
+            Status INT,
             FOREIGN KEY (Tournament_ID) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE,
             FOREIGN KEY (Event_ID) REFERENCES Event(event_id) ON DELETE CASCADE ON UPDATE CASCADE
         );

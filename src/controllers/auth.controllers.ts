@@ -232,7 +232,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
 
 export const getAllAdmins = async (req: Request, res: Response) => {
   try {
-    const [rows]: any = await pool.execute('SELECT school_group_id, firstName, lastName, email, username, password, isTournamentDirector FROM admin');
+    const [rows]: any = await pool.execute('SELECT admin_id, school_group_id, firstName, lastName, email, username, password, isTournamentDirector FROM admin');
     res.status(200).json(rows);
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving admin', error });
