@@ -292,5 +292,48 @@ export const getTeamTimeblocskByTimeblockId = async (req: Request, res: Response
     }
 }
 
+export const getTimeBlockStatus = async (req: Request, res: Response) => {
+    const { TimeBlock_ID } = req.params; // Updated the parameter to match the query
+
+    try {
+        const [rows] = await pool.execute(`
+            SELECT status FROM TimeBlock WHERE TimeBlock_ID = ?
+        `, [TimeBlock_ID]) as [any[], any];;
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'TimeBlock not found' });
+        }
+
+        res.json({ status: rows[0].status });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error retrieving TimeBlock status' });
+    }
+};
+  export const updateTimeBlockStatus = async (req: Request, res: Response) => {
+    const { TimeBlock_ID } = req.params;
+    const { status } = req.body;
+  
+    if (typeof status !== 'number') {
+        return res.status(400).json({ message: 'Invalid status value' });
+    }
+  
+    try {
+        const [result] = await pool.execute(`
+            UPDATE TimeBlock SET status = ? WHERE TimeBlock_ID = ?
+        `, [status, TimeBlock_ID]) as [any, any];
+  
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+  
+        res.json({ message: 'TimeBlock status updated successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error updating TimeBlock status' });
+    }
+  };
+  
+
 
 
