@@ -26,7 +26,7 @@ export interface IEvent {
   tournament_id: number;
   scoringAlg: String;
   description: String; 
-  status: number,
+  status: number; 
 }
 
 // models/eventHistory.model.ts
@@ -88,9 +88,12 @@ export interface ITeamTimeBlock {
   teamTimeBlock_id: number;
   timeBlock_id: number;
   team_id: number;
+  event_id: number;
   attend: boolean;
   comment: String; 
   tier: number; 
+  score: number;
+
 }
 
 // models/eventSuperVisorEvent.model.ts

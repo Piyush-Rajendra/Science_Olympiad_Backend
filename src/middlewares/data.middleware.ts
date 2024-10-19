@@ -112,9 +112,12 @@ export const createDataTables = async () => {
             TeamTimeBlock_ID INT AUTO_INCREMENT PRIMARY KEY,
             TimeBlock_ID INT,
             Team_ID INT,
+            Event_ID INT, 
             Attend BOOLEAN NOT NULL,
             Comment TEXT,
             Tier INT,
+            Score FLOAT,
+            FOREIGN KEY (Event_ID) REFERENCES Event(event_id) ON DELETE CASCADE ON UPDATE CASCADE,
             FOREIGN KEY (Team_ID) REFERENCES Team(team_id) ON DELETE CASCADE ON UPDATE CASCADE,
             FOREIGN KEY (TimeBlock_ID) REFERENCES TimeBlock(TimeBlock_ID) ON DELETE CASCADE ON UPDATE CASCADE
         );
