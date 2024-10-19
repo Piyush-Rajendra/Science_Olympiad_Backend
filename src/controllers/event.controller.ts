@@ -316,3 +316,35 @@ export const getEventSupervisorEventById = async (req: Request, res: Response) =
         res.status(500).json({ message: 'Error retrieving event-supervisor event', error: error.message });
     }
 };
+
+export const getEventsBySupervisorAndTournamentId = async (req: Request, res: Response) => {
+    const eventSupervisorId = parseInt(req.params.supervisorId); // Get event supervisor ID from the URL
+    const tournamentId = parseInt(req.params.tournamentId); // Get tournament ID from the URL
+
+    // Validate the inputs
+    if (isNaN(eventSupervisorId)) {
+        return res.status(400).json({ message: 'Invalid event supervisor ID' });
+    }
+
+    if (isNaN(tournamentId)) {
+        return res.status(400).json({ message: 'Invalid tournament ID' });
+    }
+
+    try {
+        // SQL query to find events based on both supervisor ID and tournament ID
+        const [events] = await pool.execute(
+            'SELECT * FROM Event WHERE eventSupervisor_id = ? AND tournament_id = ?',
+            [eventSupervisorId, tournamentId]
+        ) as [Event[], any];
+
+        // Check if any events were found
+        if (events.length === 0) {
+            return res.status(404).json({ message: 'No events found for this supervisor ID and tournament ID' });
+        }
+
+        res.status(200).json(events);
+    } catch (error) {
+        console.error('Error retrieving events by supervisor ID and tournament ID:', error);
+        res.status(500).json({ message: 'Error retrieving events', error: error.message });
+    }
+};
