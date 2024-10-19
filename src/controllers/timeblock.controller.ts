@@ -181,33 +181,6 @@ export const getTimeBlockStatus = async (req: Request, res: Response) => {
     }
   };
   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Add team time block
 export const addTeamTimeblock = async (req: Request, res: Response) => {
     const [timeblock_id, team_id, attend, comment, tier] = req.body;
@@ -384,7 +357,4 @@ export const updateTeamTimeBlockComment = async (req: Request, res: Response): P
         res.status(500).json({ message: 'Error updating comment' });
     }
 };
-
-
-
 
