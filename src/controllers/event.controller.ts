@@ -19,6 +19,7 @@ export const addEvent = async (req: Request, res: Response) => {
       tournament_id,
       scoringAlg,
       description: description || "", // Use provided description or default to empty string
+      status: 0,
     };
   
     try {
@@ -31,6 +32,7 @@ export const addEvent = async (req: Request, res: Response) => {
           newEvent.tournament_id,
           newEvent.scoringAlg,
           newEvent.description,
+          newEvent.status,
         ]
       );
   
@@ -312,3 +314,4 @@ export const getEventSupervisorEventById = async (req: Request, res: Response) =
         res.status(500).json({ message: 'Error retrieving event-supervisor event', error: error.message });
     }
 };
+

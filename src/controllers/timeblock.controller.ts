@@ -108,7 +108,7 @@ export const getTimeblocksByEventId = async (req: Request, res: Response) => {
     }
 
     try {
-        const [check]: any = await pool.execute('SELECT * FROM timeblocks WHERE Event_ID = ?', [id]);
+        const [check]: any = await pool.execute('SELECT * FROM TimeBlock WHERE Event_ID = ?', [id]);
         if (check.length === 0) {
             return res.status(401).json({ message: 'Timeblock does not exist' });
         }
@@ -128,7 +128,7 @@ export const getTimeblocksByTournamentId = async (req: Request, res: Response) =
     }
 
     try {
-        const [check]: any = await pool.execute('SELECT * FROM timeblocks WHERE Tournament_ID = ?', [id]);
+        const [check]: any = await pool.execute('SELECT * FROM TimeBlock WHERE Tournament_ID = ?', [id]);
         if (check.length === 0) {
             return res.status(401).json({ message: 'Timeblock does not exist' });
         }

@@ -28,6 +28,7 @@ export interface IEvent {
   tournament_id: number;
   scoringAlg: String;
   description: String; 
+  status: number,
 }
 
 // models/eventHistory.model.ts

@@ -24,7 +24,6 @@ router.get('/get-events-all', getAllEvents);
 router.get('/get-events-by-tournament/:tournamentId', getEventsByTournamentId);
 router.get('/get-events-by-supervisor/:supervisorId', getEventsByEventSupervisorId);
 router.delete('/delete-event/:id', deleteEvent);
-router.get('/get-event/:id', getEventById);
 
 //School
 router.post('/add-school', addSchool);
