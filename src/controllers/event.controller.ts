@@ -309,6 +309,50 @@ export const getEventSupervisorEventById = async (req: Request, res: Response) =
     }
 };
 
+
+export const getEventStatus = async (req: Request, res: Response) => {
+  const { event_id } = req.params;
+
+  try {
+      const [rows] = await pool.execute(`
+          SELECT status FROM Event WHERE event_id = ?
+      `, [event_id]) as [any[], any];
+
+      if (rows.length === 0) {
+          return res.status(404).json({ message: 'Event not found' });
+      }
+
+      res.json({ status: rows[0].status });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error retrieving event status' });
+  }
+};
+
+export const updateEventStatus = async (req: Request, res: Response) => {
+  const { event_id } = req.params;
+  const { status } = req.body;
+
+  if (typeof status !== 'number') {
+      return res.status(400).json({ message: 'Invalid status value' });
+  }
+
+  try {
+      const [result] = await pool.execute(`
+          UPDATE Event SET status = ? WHERE event_id = ?
+      `, [status, event_id]) as [any, any];
+
+      if (result.affectedRows === 0) {
+          return res.status(404).json({ message: 'Event not found' });
+      }
+
+      res.json({ message: 'Event status updated successfully' });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error updating event status' });
+  }
+};
+
 export const getEventsBySupervisorAndTournamentId = async (req: Request, res: Response) => {
     const eventSupervisorId = parseInt(req.params.supervisorId); // Get event supervisor ID from the URL
     const tournamentId = parseInt(req.params.tournamentId); // Get tournament ID from the URL
@@ -340,3 +384,4 @@ export const getEventsBySupervisorAndTournamentId = async (req: Request, res: Re
         res.status(500).json({ message: 'Error retrieving events', error: error.message });
     }
 };
+
