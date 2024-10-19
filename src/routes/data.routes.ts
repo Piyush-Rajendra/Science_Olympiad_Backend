@@ -17,7 +17,7 @@ router.put('/edit-tournament/:id', editTournament);
 router.delete('/delete-tournament/:id', deleteTournament);
 router.get('/get-tournament/:id', getTourneyById);
 router.get('/get-current-tournaments', getCurrentTournamentIds);
-router.get('/get-events/supervisor/:supervisorId/tournament/:tournamentId', getEventsBySupervisorAndTournamentId);
+
 
 //Event 
 router.post('/add-event', addEvent);
@@ -27,6 +27,7 @@ router.get('/get-events-by-tournament/:tournamentId', getEventsByTournamentId);
 router.get('/get-events-by-supervisor/:supervisorId', getEventsByEventSupervisorId);
 router.delete('/delete-event/:id', deleteEvent);
 router.get('/get-event/:id', getEventById);
+router.get('/get-events/supervisor/:supervisorId/tournament/:tournamentId', getEventsBySupervisorAndTournamentId);
 
 //School
 router.post('/add-school', addSchool);
