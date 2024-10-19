@@ -139,6 +139,49 @@ export const getTimeblocksByTournamentId = async (req: Request, res: Response) =
     }
 }
 
+export const getTimeBlockStatus = async (req: Request, res: Response) => {
+    const { TimeBlock_ID } = req.params; // Updated the parameter to match the query
+
+    try {
+        const [rows] = await pool.execute(`
+            SELECT status FROM TimeBlock WHERE TimeBlock_ID = ?
+        `, [TimeBlock_ID]) as [any[], any];;
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'TimeBlock not found' });
+        }
+
+        res.json({ status: rows[0].status });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error retrieving TimeBlock status' });
+    }
+};
+  export const updateTimeBlockStatus = async (req: Request, res: Response) => {
+    const { TimeBlock_ID } = req.params;
+    const { status } = req.body;
+  
+    if (typeof status !== 'number') {
+        return res.status(400).json({ message: 'Invalid status value' });
+    }
+  
+    try {
+        const [result] = await pool.execute(`
+            UPDATE TimeBlock SET status = ? WHERE TimeBlock_ID = ?
+        `, [status, TimeBlock_ID]) as [any, any];
+  
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+  
+        res.json({ message: 'TimeBlock status updated successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error updating TimeBlock status' });
+    }
+  };
+  
+
 
 
 
@@ -292,48 +335,56 @@ export const getTeamTimeblocskByTimeblockId = async (req: Request, res: Response
     }
 }
 
-export const getTimeBlockStatus = async (req: Request, res: Response) => {
-    const { TimeBlock_ID } = req.params; // Updated the parameter to match the query
+export const getTeamTimeBlockComment = async (req: Request, res: Response): Promise<void> => {
+    const { TeamTimeBlock_ID } = req.params;
 
     try {
-        const [rows] = await pool.execute(`
-            SELECT status FROM TimeBlock WHERE TimeBlock_ID = ?
-        `, [TimeBlock_ID]) as [any[], any];;
+        // Query to get the comment by TeamTimeBlock_ID
+        const [rows]: [any[], any] = await pool.execute(`
+            SELECT Comment FROM TeamTimeBlock WHERE TeamTimeBlock_ID = ?
+        `, [TeamTimeBlock_ID]);
 
         if (rows.length === 0) {
-            return res.status(404).json({ message: 'TimeBlock not found' });
+            res.status(404).json({ message: 'TeamTimeBlock not found' });
+            return;
         }
 
-        res.json({ status: rows[0].status });
+        // Send the comment as JSON
+        res.json({ comment: rows[0].Comment });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error retrieving TimeBlock status' });
+        console.error('Error retrieving comment:', error);
+        res.status(500).json({ message: 'Error retrieving comment' });
     }
 };
-  export const updateTimeBlockStatus = async (req: Request, res: Response) => {
-    const { TimeBlock_ID } = req.params;
-    const { status } = req.body;
-  
-    if (typeof status !== 'number') {
-        return res.status(400).json({ message: 'Invalid status value' });
+
+// Update the comment for a specific TeamTimeBlock by its ID
+export const updateTeamTimeBlockComment = async (req: Request, res: Response): Promise<void> => {
+    const { TeamTimeBlock_ID } = req.params;
+    const { comment } = req.body; // Expect the new comment from the request body
+
+    if (typeof comment !== 'string') {
+        res.status(400).json({ message: 'Invalid comment format' });
+        return;
     }
-  
+
     try {
-        const [result] = await pool.execute(`
-            UPDATE TimeBlock SET status = ? WHERE TimeBlock_ID = ?
-        `, [status, TimeBlock_ID]) as [any, any];
-  
+        // Query to update the comment by TeamTimeBlock_ID
+        const [result]: [any, any] = await pool.execute(`
+            UPDATE TeamTimeBlock SET Comment = ? WHERE TeamTimeBlock_ID = ?
+        `, [comment, TeamTimeBlock_ID]);
+
         if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Event not found' });
+            res.status(404).json({ message: 'TeamTimeBlock not found' });
+            return;
         }
-  
-        res.json({ message: 'TimeBlock status updated successfully' });
+
+        res.json({ message: 'Comment updated successfully' });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error updating TimeBlock status' });
+        console.error('Error updating comment:', error);
+        res.status(500).json({ message: 'Error updating comment' });
     }
-  };
-  
+};
+
 
 
 
