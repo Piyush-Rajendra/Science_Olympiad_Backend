@@ -16,6 +16,8 @@ router.get('/get-tournaments', getAllTournaments);
 router.put('/edit-tournament/:id', editTournament);
 router.delete('/delete-tournament/:id', deleteTournament);
 router.get('/get-tournament/:id', getTourneyById);
+router.get('/get-current-tournaments', getCurrentTournamentIds);
+router.get('/get-events/supervisor/:supervisorId/tournament/:tournamentId', getEventsBySupervisorAndTournamentId);
 
 //Event 
 router.post('/add-event', addEvent);
