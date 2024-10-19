@@ -3,6 +3,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import pool from '../../config/db.config';
 import { IAdmin, IEventSupervisor, ISuperadmin, IUser} from '../models/auth.model';
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 
 const secretKey = 'UGA';
 
@@ -455,15 +457,16 @@ export const getEventSupervisorById = async (req: Request, res: Response) => {
 
 //Users
 
-
 export const registerUser = async (req: Request, res: Response) => {
-  const { name, email, password, isAttendance, school_id } = req.body;
+  const { name, email, isAttendance, school_id } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required' });
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  // Generate a random password
+  const randomPassword = crypto.randomBytes(8).toString('hex');
+  const hashedPassword = await bcrypt.hash(randomPassword, 10);
 
   const newUser: IUser = {
     user_id: 0,
@@ -472,19 +475,45 @@ export const registerUser = async (req: Request, res: Response) => {
     password: hashedPassword,
     isAttendance,
     school_id,
+    passwordChanged: false,  // Add a flag to check if the user has changed their password
   };
 
   try {
-    await pool.execute('INSERT INTO users (name, email, password, isAttendance, school_id) VALUES (?, ?, ?, ?, ?)', [
-      newUser.name,
-      newUser.email,
-      newUser.password,
-      newUser.isAttendance,
-      newUser.school_id,
-    ]);
+    // Send an email to the user with the random password first
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true, // true for port 465, false for other ports
+      auth: {
+        user: 'ecinemabooking387@gmail.com',
+        pass: "injgdluouhraowjt", // Email password from environment variable
+      },
+    });
 
-    res.status(201).json({ message: 'User registered successfully' });
+    // console.log("EMAIL_USER: ", process.env.EMAIL_USER);
+console.log("EMAIL_PASS: ", process.env.password);
+
+    const mailOptions = {
+      from: '"EPOCH SCORING SYSTEM" <ecinemabooking387@gmail.com>',
+      to: newUser.email,
+      subject: 'Profile Created - Change Your Password',
+      text: `Dear ${newUser.name},\n\nYour profile has been created successfully. Please use the following temporary password to log in: ${randomPassword}\n\nPlease change your password immediately after logging in.\n\nThank you!`,
+    };
+
+    // Send the email
+    await transporter.sendMail(mailOptions);
+
+    // If email sent successfully, insert the new user into the database
+    await pool.execute(
+      'INSERT INTO users (name, email, password, isAttendance, school_id, passwordChanged) VALUES (?, ?, ?, ?, ?, ?)',
+      [newUser.name, newUser.email, newUser.password, newUser.isAttendance, newUser.school_id, newUser.passwordChanged]
+    );
+
+    res.status(201).json({ message: 'User registered successfully and email sent' });
+
   } catch (error) {
+    // If there's an error with sending email or inserting the user, return error response
     res.status(500).json({ message: 'Error registering user', error });
   }
 };
@@ -505,6 +534,11 @@ export const loginUser = async (req: Request, res: Response) => {
 
     const user: IUser = rows[0];
 
+    // Check if the password has been changed
+    if (!user.passwordChanged) {
+      return res.status(403).json({ message: 'Please change your password before logging in' });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -518,6 +552,125 @@ export const loginUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error logging in', error });
   }
 };
+
+
+export const changePassword = async (req: Request, res: Response) => {
+  const { email, oldPassword, newPassword } = req.body;
+
+  if (!email || !oldPassword || !newPassword) {
+    return res.status(400).json({ message: 'Email, old password, and new password are required' });
+  }
+
+  try {
+    const [rows]: any = await pool.execute('SELECT * FROM users WHERE email = ?', [email]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user: IUser = rows[0];
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Old password is incorrect' });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    await pool.execute('UPDATE users SET password = ?, passwordChanged = ? WHERE email = ?', [
+      hashedNewPassword,
+      true, // Set passwordChanged to true
+      email,
+    ]);
+
+    res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error changing password', error });
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  // Check if email is provided
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    // Fetch the user from the database using email
+    const [rows]: any = await pool.execute('SELECT * FROM users WHERE email = ?', [email]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'No user found with this email' });
+    }
+
+    const user = rows[0];
+
+    // Generate a token (JWT) with a short expiration time (e.g., 1 hour)
+    const token = jwt.sign({ id: user.user_id, email: user.email }, secretKey, { expiresIn: '1h' });
+
+    // Create the password reset link
+    const resetLink = `http://localhost:3000/reset-password?token=${token}`;
+
+    // Send email with the reset link
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: 'ecinemabooking387@gmail.com',
+        pass: "injgdluouhraowjt",
+      },
+    });
+
+    const mailOptions = {
+      from: '"EPOCH SCORING SYSTEM" <ecinemabooking387@gmail.com>',
+      to: email,
+      subject: 'Password Reset Request',
+      text: `Hi ${user.name},\n\nYou requested a password reset. Click the link below to reset your password:\n\n${resetLink}\n\nThis link will expire in 1 hour.\n\nIf you did not request this, please ignore this email.`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: 'Password reset email sent successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error sending password reset email', error });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ message: 'Token and new password are required' });
+  }
+
+  try {
+    // Verify the token
+    const decoded: any = jwt.verify(token, secretKey);
+
+    // If token is valid, hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password in the database
+    await pool.execute('UPDATE users SET password = ?, passwordChanged = true WHERE user_id = ?', [
+      hashedPassword,
+      decoded.id,
+    ]);
+
+    res.status(200).json({ message: 'Password reset successfully' });
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(400).json({ message: 'Password reset link has expired' });
+    }
+    res.status(500).json({ message: 'Error resetting password', error });
+  }
+};
+
+
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {

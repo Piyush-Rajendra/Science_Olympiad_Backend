@@ -3,7 +3,10 @@ import { register, login, getAllUsers, registerAdmin, loginAdmin, getAllAdmins, 
     updateSuperAdmin, deleteSuperAdmin, loginEventSupervisor, registerEventSupervisor, 
     getAllEventSupervisors, updateEventSupervisor, deleteAdmin, deleteEventSupervisor, 
     getAllSuperAdmins, getSuperAdminById, updateUser, registerUser, loginUser, deleteuser, 
-    getAdminById, getEventSupervisorById, getUserById } from '../controllers/auth.controllers';
+    getAdminById, getEventSupervisorById, getUserById, 
+    changePassword,
+    forgotPassword,
+    resetPassword} from '../controllers/auth.controllers';
 import { authenticateJWT } from '../middlewares/extractJWT';
 
 const router = Router();
@@ -27,8 +30,10 @@ router.delete('/deleteEventSupervisor/:id',deleteEventSupervisor)
 //User
 router.post('/registeruser', registerUser);
 router.post('/userLogin', loginUser);
-router.delete('/delteUser/:id',deleteuser)
-
+router.delete('/delteUser/:id',deleteuser);
+router.post('/changePassword', changePassword)
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 
 // Protected Routes

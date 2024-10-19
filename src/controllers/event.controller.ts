@@ -3,7 +3,7 @@ import pool from '../../config/db.config';
 import { IEvent, IEventSuperVisorEvent } from '../models/data.models'; // Adjust the import path
 
 export const addEvent = async (req: Request, res: Response) => {
-    const { name, location, eventSupervisor_id, tournament_id, scoringAlg, description } = req.body;
+    const { name, tournament_id, scoringAlg, description, status } = req.body;
   
     // Validate required fields
     if (!name || !tournament_id || !scoringAlg) {
@@ -14,23 +14,21 @@ export const addEvent = async (req: Request, res: Response) => {
     const newEvent: IEvent = {
       event_id: 0, // Auto-increment handled by the database
       name,
-      location: location || "", // Use provided location or default to empty string
-      eventSupervisor_id: eventSupervisor_id || null, // Set to null if not provided
       tournament_id,
       scoringAlg,
       description: description || "", // Use provided description or default to empty string
+      status,
     };
   
     try {
       const [result] = await pool.execute(
-        'INSERT INTO Event (name, location, eventSupervisor_id, tournament_id, scoringAlg, description) VALUES (?, ?, ?, ?, ?, ?)',
+        'INSERT INTO Event (name, tournament_id, scoringAlg, description, status) VALUES (?, ?, ?, ?, ?)',
         [
           newEvent.name,
-          newEvent.location,
-          newEvent.eventSupervisor_id,
           newEvent.tournament_id,
           newEvent.scoringAlg,
           newEvent.description,
+          newEvent.status,
         ]
       );
   
@@ -47,27 +45,25 @@ export const addEvent = async (req: Request, res: Response) => {
     const event_id = parseInt(req.params.id); // Get the event ID from the URL
     const {
       name,
-      location,
-      eventSupervisor_id = null, // Optional field, set to null if not provided
       tournament_id,
       scoringAlg = null, // Optional field, set to null if not provided
       description = null, // Optional field, set to null if not provided
+      status = null,
     } = req.body;
   
 
     try {
       const [result] = await pool.execute(
         `UPDATE Event 
-         SET name = ?, location = ?, eventSupervisor_id = ?, tournament_id = ?, scoringAlg = ?, description = ?
+         SET name = ?, tournament_id = ?, scoringAlg = ?, description = ?, status = ?
          WHERE event_id = ?`,
         [
           name,
-          location || null, // Use null if location is not provided
-          eventSupervisor_id, // This can be null if not provided
           tournament_id, // Required
           scoringAlg, // This can be null if not provided
           description, // This can be null if not provided
           event_id, // Use the event ID from the URL
+          status,
         ]
       );
   
@@ -312,3 +308,80 @@ export const getEventSupervisorEventById = async (req: Request, res: Response) =
         res.status(500).json({ message: 'Error retrieving event-supervisor event', error: error.message });
     }
 };
+
+
+export const getEventStatus = async (req: Request, res: Response) => {
+  const { event_id } = req.params;
+
+  try {
+      const [rows] = await pool.execute(`
+          SELECT status FROM Event WHERE event_id = ?
+      `, [event_id]) as [any[], any];
+
+      if (rows.length === 0) {
+          return res.status(404).json({ message: 'Event not found' });
+      }
+
+      res.json({ status: rows[0].status });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error retrieving event status' });
+  }
+};
+
+export const updateEventStatus = async (req: Request, res: Response) => {
+  const { event_id } = req.params;
+  const { status } = req.body;
+
+  if (typeof status !== 'number') {
+      return res.status(400).json({ message: 'Invalid status value' });
+  }
+
+  try {
+      const [result] = await pool.execute(`
+          UPDATE Event SET status = ? WHERE event_id = ?
+      `, [status, event_id]) as [any, any];
+
+      if (result.affectedRows === 0) {
+          return res.status(404).json({ message: 'Event not found' });
+      }
+
+      res.json({ message: 'Event status updated successfully' });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error updating event status' });
+  }
+};
+
+export const getEventsBySupervisorAndTournamentId = async (req: Request, res: Response) => {
+    const eventSupervisorId = parseInt(req.params.supervisorId); // Get event supervisor ID from the URL
+    const tournamentId = parseInt(req.params.tournamentId); // Get tournament ID from the URL
+
+    // Validate the inputs
+    if (isNaN(eventSupervisorId)) {
+        return res.status(400).json({ message: 'Invalid event supervisor ID' });
+    }
+
+    if (isNaN(tournamentId)) {
+        return res.status(400).json({ message: 'Invalid tournament ID' });
+    }
+
+    try {
+        // SQL query to find events based on both supervisor ID and tournament ID
+        const [events] = await pool.execute(
+            'SELECT * FROM Event WHERE eventSupervisor_id = ? AND tournament_id = ?',
+            [eventSupervisorId, tournamentId]
+        ) as [Event[], any];
+
+        // Check if any events were found
+        if (events.length === 0) {
+            return res.status(404).json({ message: 'No events found for this supervisor ID and tournament ID' });
+        }
+
+        res.status(200).json(events);
+    } catch (error) {
+        console.error('Error retrieving events by supervisor ID and tournament ID:', error);
+        res.status(500).json({ message: 'Error retrieving events', error: error.message });
+    }
+};
+
