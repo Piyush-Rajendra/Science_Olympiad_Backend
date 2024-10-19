@@ -6,7 +6,7 @@ import { addTeam, deleteTeam, editTeam, getAllTeams, getTeamById, getTeamsByScho
 import { addScore, deleteScore, editScore, getScoreById, getScoresByEventId, getScoresBySchoolGroupId, getScoresBySchoolId, getScoresByTeamId, getScoresByTournamentId } from '../controllers/score.controllers';
 import { updateTimeBlockStatus, getTimeBlockStatus, addTimeblocks, editTimeblock, deleteTimeblock, getTimeblocksByEventId, getTimeblocksByTournamentId} from '../controllers/timeblock.controller'
 import { addSchoolGroup, deleteSchoolGroup, editSchoolGroup, getAllSchoolGroups } from '../controllers/schoolgroups.controllers'
-import { updateAttendStatus, getAttendStatus, updateTeamTimeBlockComment, getTeamTimeBlockComment, addTeamTimeBlock, deleteTeamTimeBlock, editTeamTimeBlock, getTeamTimeBlockById, getTeamTimeBlocksByEventId, getTeamTimeBlocksByTeamId, getTeamTimeBlocksByTimeBlockId } from '../controllers/teamtimeblock.controller';
+import { updateAttendStatus, getAttendStatus, updateTeamTimeBlockComment, getTeamTimeBlockComment, addTeamTimeBlock, deleteTeamTimeBlock, editTeamTimeBlock, getTeamTimeBlockById, getTeamTimeBlocksByEventId, getTeamTimeBlocksByTeamId, getTeamTimeBlocksByTimeBlockId, getTeamTimeBlockWithSchoolById, getUniqueIdByTeamTimeBlockId } from '../controllers/teamtimeblock.controller';
 
 
 const router = Router();
@@ -88,6 +88,8 @@ router.get('/team-timeblock/:TeamTimeBlock_ID/comment', getTeamTimeBlockComment)
 router.put('/team-timeblock/:TeamTimeBlock_ID/comment', updateTeamTimeBlockComment);
 router.get('/teamtimeblock/:teamTimeBlockId/attend', getAttendStatus);
 router.put('/teamtimeblock/:teamTimeBlockId/attend', updateAttendStatus);
+router.get('/team-timeblocks-get-school-name/:id', getTeamTimeBlockWithSchoolById);
+router.get('/team-timeblocks/:id/unique-id', getUniqueIdByTeamTimeBlockId);
 
 // School Groups
 router.post('/add-schoolgroup', addSchoolGroup);

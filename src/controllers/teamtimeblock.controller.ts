@@ -325,3 +325,48 @@ export const updateAttendStatus = async (req: Request, res: Response) => {
     }
 };
 
+export const getTeamTimeBlockWithSchoolById = async (req: Request, res: Response) => {
+    const { id } = req.params;
+  
+    try {
+      const [rows] = await pool.execute(`
+        SELECT School.name AS schoolName
+        FROM TeamTimeBlock
+        JOIN Team ON TeamTimeBlock.Team_ID = Team.team_id
+        JOIN School ON Team.school_id = School.ID
+        WHERE TeamTimeBlock.TeamTimeBlock_ID = ?
+      `, [id]);
+  
+      if ((rows as any).length === 0) {
+        return res.status(404).json({ message: 'Team TimeBlock not found' });
+      }
+  
+      res.json(rows[0]);
+    } catch (error) {
+      console.error('Error fetching school name by Team TimeBlock ID', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  };
+
+  export const getUniqueIdByTeamTimeBlockId = async (req: Request, res: Response) => {
+    const { id } = req.params;
+  
+    try {
+      const [rows] = await pool.execute(`
+        SELECT Team.unique_id
+        FROM TeamTimeBlock
+        JOIN Team ON TeamTimeBlock.Team_ID = Team.team_id
+        WHERE TeamTimeBlock.TeamTimeBlock_ID = ?
+      `, [id]);
+  
+      if ((rows as any).length === 0) {
+        return res.status(404).json({ message: 'Team TimeBlock not found' });
+      }
+  
+      res.json(rows[0]);
+    } catch (error) {
+      console.error('Error fetching unique ID by Team TimeBlock ID', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  };
+
