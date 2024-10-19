@@ -272,3 +272,56 @@ export const updateTeamTimeBlockComment = async (req: Request, res: Response): P
     }
 };
 
+export const getAttendStatus = async (req: Request, res: Response) => {
+    try {
+        const { teamTimeBlockId } = req.params;
+
+        // SQL query to get the Attend value
+        const [rows] = await pool.execute(
+            `SELECT Attend 
+             FROM TeamTimeBlock 
+             WHERE TeamTimeBlock_ID = ?`,
+            [teamTimeBlockId]
+        );
+
+        if ((rows as any).length === 0) {
+            return res.status(404).json({ message: 'TeamTimeBlock not found' });
+        }
+
+        const attend = (rows as any)[0].Attend;
+        res.json({ attend });
+    } catch (error) {
+        console.error('Error getting Attend status:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+export const updateAttendStatus = async (req: Request, res: Response) => {
+    try {
+        const { teamTimeBlockId } = req.params;
+        const { attend } = req.body; // Make sure the client sends a boolean value for attend
+
+        // Validate the input (attend must be a boolean)
+        if (typeof attend !== 'boolean') {
+            return res.status(400).json({ message: 'Invalid value for Attend. Must be a boolean.' });
+        }
+
+        // SQL query to update the Attend value
+        const [result] = await pool.execute(
+            `UPDATE TeamTimeBlock 
+             SET Attend = ? 
+             WHERE TeamTimeBlock_ID = ?`,
+            [attend, teamTimeBlockId]
+        );
+
+        if ((result as any).affectedRows === 0) {
+            return res.status(404).json({ message: 'TeamTimeBlock not found' });
+        }
+
+        res.json({ message: 'Attend status updated successfully' });
+    } catch (error) {
+        console.error('Error updating Attend status:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
