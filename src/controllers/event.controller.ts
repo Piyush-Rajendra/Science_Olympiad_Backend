@@ -3,7 +3,7 @@ import pool from '../../config/db.config';
 import { IEvent, IEventSuperVisorEvent } from '../models/data.models'; // Adjust the import path
 
 export const addEvent = async (req: Request, res: Response) => {
-    const { name, location, eventSupervisor_id, tournament_id, scoringAlg, description } = req.body;
+    const { name, location, eventSupervisor_id, tournament_id, scoringAlg, description, status } = req.body;
   
     // Validate required fields
     if (!name || !tournament_id || !scoringAlg) {
@@ -19,11 +19,12 @@ export const addEvent = async (req: Request, res: Response) => {
       tournament_id,
       scoringAlg,
       description: description || "", // Use provided description or default to empty string
+      status,
     };
   
     try {
       const [result] = await pool.execute(
-        'INSERT INTO Event (name, location, eventSupervisor_id, tournament_id, scoringAlg, description) VALUES (?, ?, ?, ?, ?, ?)',
+        'INSERT INTO Event (name, location, eventSupervisor_id, tournament_id, scoringAlg, description, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
         [
           newEvent.name,
           newEvent.location,
@@ -31,6 +32,7 @@ export const addEvent = async (req: Request, res: Response) => {
           newEvent.tournament_id,
           newEvent.scoringAlg,
           newEvent.description,
+          newEvent.status,
         ]
       );
   
@@ -52,13 +54,14 @@ export const addEvent = async (req: Request, res: Response) => {
       tournament_id,
       scoringAlg = null, // Optional field, set to null if not provided
       description = null, // Optional field, set to null if not provided
+      status = null,
     } = req.body;
   
 
     try {
       const [result] = await pool.execute(
         `UPDATE Event 
-         SET name = ?, location = ?, eventSupervisor_id = ?, tournament_id = ?, scoringAlg = ?, description = ?
+         SET name = ?, location = ?, eventSupervisor_id = ?, tournament_id = ?, scoringAlg = ?, description = ?, status = ?
          WHERE event_id = ?`,
         [
           name,
@@ -68,6 +71,7 @@ export const addEvent = async (req: Request, res: Response) => {
           scoringAlg, // This can be null if not provided
           description, // This can be null if not provided
           event_id, // Use the event ID from the URL
+          status,
         ]
       );
   

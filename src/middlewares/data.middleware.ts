@@ -86,6 +86,7 @@ export const createDataTables = async () => {
             tournament_id INT,
             scoringAlg VARCHAR(255) NOT NULL,
             description TEXT,
+            status INT,
             FOREIGN KEY (tournament_id) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
     `);
