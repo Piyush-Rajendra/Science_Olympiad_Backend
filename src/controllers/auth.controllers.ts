@@ -255,14 +255,14 @@ export const changePasswordAdmin = async (req: Request, res: Response) => {
 
 
 export const loginAdmin = async (req: Request, res: Response) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!username || !password) {
+  if (!email || !password) {
     return res.status(400).json({ message: 'Username and password are required' });
   }
 
   try {
-    const [rows]: any = await pool.execute('SELECT * FROM admin WHERE username = ?', [username]);
+    const [rows]: any = await pool.execute('SELECT * FROM admin WHERE email = ?', [email]);
 
     if (rows.length === 0) {
       return res.status(401).json({ message: 'Invalid credentials' });
@@ -456,14 +456,14 @@ export const changePasswordEventSupervisor = async (req: Request, res: Response)
 
 
 export const loginEventSupervisor = async (req: Request, res: Response) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ message: 'Username and password are required' });
+  if (!email || !password) {
+    return res.status(400).json({ message: 'email and password are required' });
   }
 
   try {
-    const [rows]: any = await pool.execute('SELECT * FROM eventsupervisor WHERE username = ?', [username]);
+    const [rows]: any = await pool.execute('SELECT * FROM eventsupervisor WHERE email = ?', [email]);
 
     if (rows.length === 0) {
       return res.status(401).json({ message: 'Invalid credentials' });
