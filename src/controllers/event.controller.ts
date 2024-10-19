@@ -3,7 +3,7 @@ import pool from '../../config/db.config';
 import { IEvent, IEventSuperVisorEvent } from '../models/data.models'; // Adjust the import path
 
 export const addEvent = async (req: Request, res: Response) => {
-    const { name, location, eventSupervisor_id, tournament_id, scoringAlg, description } = req.body;
+    const { name, tournament_id, scoringAlg, description, status } = req.body;
   
     // Validate required fields
     if (!name || !tournament_id || !scoringAlg) {
@@ -14,21 +14,17 @@ export const addEvent = async (req: Request, res: Response) => {
     const newEvent: IEvent = {
       event_id: 0, // Auto-increment handled by the database
       name,
-      location: location || "", // Use provided location or default to empty string
-      eventSupervisor_id: eventSupervisor_id || null, // Set to null if not provided
       tournament_id,
       scoringAlg,
       description: description || "", // Use provided description or default to empty string
-      status: 0,
+      status: status,
     };
   
     try {
       const [result] = await pool.execute(
-        'INSERT INTO Event (name, location, eventSupervisor_id, tournament_id, scoringAlg, description) VALUES (?, ?, ?, ?, ?, ?)',
+        'INSERT INTO Event (name, tournament_id, scoringAlg, description, status) VALUES (?, ?, ?, ?, ?)',
         [
           newEvent.name,
-          newEvent.location,
-          newEvent.eventSupervisor_id,
           newEvent.tournament_id,
           newEvent.scoringAlg,
           newEvent.description,
@@ -49,8 +45,6 @@ export const addEvent = async (req: Request, res: Response) => {
     const event_id = parseInt(req.params.id); // Get the event ID from the URL
     const {
       name,
-      location,
-      eventSupervisor_id = null, // Optional field, set to null if not provided
       tournament_id,
       scoringAlg = null, // Optional field, set to null if not provided
       description = null, // Optional field, set to null if not provided
@@ -60,12 +54,10 @@ export const addEvent = async (req: Request, res: Response) => {
     try {
       const [result] = await pool.execute(
         `UPDATE Event 
-         SET name = ?, location = ?, eventSupervisor_id = ?, tournament_id = ?, scoringAlg = ?, description = ?
+         SET name = ?, tournament_id = ?, scoringAlg = ?, description = ?
          WHERE event_id = ?`,
         [
           name,
-          location || null, // Use null if location is not provided
-          eventSupervisor_id, // This can be null if not provided
           tournament_id, // Required
           scoringAlg, // This can be null if not provided
           description, // This can be null if not provided
