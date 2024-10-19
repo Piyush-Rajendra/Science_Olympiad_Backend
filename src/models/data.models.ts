@@ -90,9 +90,12 @@ export interface ITeamTimeBlock {
   teamTimeBlock_id: number;
   timeBlock_id: number;
   team_id: number;
+  event_id: number;
   attend: boolean;
   comment: String; 
   tier: number; 
+  score: number;
+
 }
 
 // models/eventSuperVisorEvent.model.ts
