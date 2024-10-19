@@ -163,15 +163,16 @@ export const getSuperAdminById = async (req: Request, res: Response) => {
 
 //Admin 
 
-
 export const registerAdmin = async (req: Request, res: Response) => {
-  const { school_group_id, firstName, lastName, email, username, password, isTournamentDirector } = req.body;
+  const { school_group_id, firstName, lastName, email, username, isTournamentDirector } = req.body;
 
-  if (!email || !username || !password) {
-    return res.status(400).json({ message: 'Email, username, and password are required' });
+  if (!email || !username) {
+    return res.status(400).json({ message: 'Email and username are required' });
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  // Generate a random password
+  const randomPassword = crypto.randomBytes(8).toString('hex');
+  const hashedPassword = await bcrypt.hash(randomPassword, 10);
 
   const newAdmin: IAdmin = {
     admin_id: 0,
@@ -185,6 +186,7 @@ export const registerAdmin = async (req: Request, res: Response) => {
   };
 
   try {
+    // Insert the new admin into the database
     await pool.execute('INSERT INTO admin (school_group_id, firstName, lastName, email, username, password, isTournamentDirector) VALUES (?, ?, ?, ?, ?, ?, ?)', [
       newAdmin.school_group_id,
       newAdmin.firstName,
@@ -195,9 +197,59 @@ export const registerAdmin = async (req: Request, res: Response) => {
       newAdmin.isTournamentDirector,
     ]);
 
-    res.status(201).json({ message: 'Admin registered successfully' });
+    // Send an email to the new admin with the random password
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: 'ecinemabooking387@gmail.com',
+        pass: 'injgdluouhraowjt', // Use environment variable for security
+      },
+    });
+
+    const mailOptions = {
+      from: '"EPOCH SCORING SYSTEM" <ecinemabooking387@gmail.com>',
+      to: newAdmin.email,
+      subject: 'Profile Created - Change Your Password',
+      text: `Dear ${newAdmin.firstName},\n\nYour admin profile has been created successfully. Please use the following temporary password to log in: ${randomPassword}\n\nPlease change your password immediately after logging in.\n\nThank you!`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(201).json({ message: 'Admin registered successfully and email sent' });
   } catch (error) {
     res.status(500).json({ message: 'Error registering admin', error });
+  }
+};
+
+
+export const changePasswordAdmin = async (req: Request, res: Response) => {
+  const { email, oldPassword, newPassword } = req.body;
+
+  if (!email || !oldPassword || !newPassword) {
+    return res.status(400).json({ message: 'Email, old password, and new password are required' });
+  }
+
+  try {
+    const [rows]: any = await pool.execute('SELECT * FROM admin WHERE email = ?', [email]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Admin not found' });
+    }
+
+    const admin: IAdmin = rows[0];
+
+    const isMatch = await bcrypt.compare(oldPassword, admin.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Old password is incorrect' });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    await pool.execute('UPDATE admin SET password = ? WHERE email = ?', [hashedNewPassword, email]);
+
+    res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error changing password', error });
   }
 };
 
@@ -311,15 +363,16 @@ export const getAdminById = async (req: Request, res: Response) => {
 };
 
 
-// Event Supervisor
 export const registerEventSupervisor = async (req: Request, res: Response) => {
-  const { school_group_id, email, username, password,firstName,lastName } = req.body;
+  const { school_group_id, email, username, firstName, lastName } = req.body;
 
-  if (!email || !username || !password) {
-    return res.status(400).json({ message: 'Email, username, and password are required' });
+  if (!email || !username) {
+    return res.status(400).json({ message: 'Email and username are required' });
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  // Generate a random password
+  const randomPassword = crypto.randomBytes(8).toString('hex');
+  const hashedPassword = await bcrypt.hash(randomPassword, 10);
 
   const newEventSupervisor: IEventSupervisor = {
     eventSupervisor_id: 0,
@@ -332,20 +385,75 @@ export const registerEventSupervisor = async (req: Request, res: Response) => {
   };
 
   try {
-    await pool.execute('INSERT INTO eventsupervisor (school_group_id, email, username, password,firstName,lastName) VALUES (?, ?, ?, ?, ?, ?)', [
-      newEventSupervisor.school_group_id,
-      newEventSupervisor.email,
-      newEventSupervisor.username,
-      newEventSupervisor.password,
-      newEventSupervisor.firstName,
-      newEventSupervisor.lastName,
-    ]);
+    // Insert the new event supervisor into the database
+    await pool.execute(
+      'INSERT INTO eventsupervisor (school_group_id, email, username, password, firstName, lastName) VALUES (?, ?, ?, ?, ?, ?)', 
+      [
+        newEventSupervisor.school_group_id,
+        newEventSupervisor.email,
+        newEventSupervisor.username,
+        newEventSupervisor.password,
+        newEventSupervisor.firstName,
+        newEventSupervisor.lastName,
+      ]
+    );
 
-    res.status(200).json({ message: 'Event Supervisor registered successfully' });
+    // Send an email to the new event supervisor with the random password
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: 'ecinemabooking387@gmail.com',
+        pass: "injgdluouhraowjt" // Use environment variable for security
+      },
+    });
+
+    const mailOptions = {
+      from: '"EPOCH SCORING SYSTEM" <ecinemabooking387@gmail.com>',
+      to: newEventSupervisor.email,
+      subject: 'Event Supervisor Created - Change Your Password',
+      text: `Dear ${newEventSupervisor.firstName},\n\nYour event supervisor profile has been created successfully. Please use the following temporary password to log in: ${randomPassword}\n\nPlease change your password immediately after logging in.\n\nThank you!`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(201).json({ message: 'Event Supervisor registered successfully and email sent' });
   } catch (error) {
     res.status(500).json({ message: 'Error registering event supervisor', error });
   }
 };
+
+export const changePasswordEventSupervisor = async (req: Request, res: Response) => {
+  const { email, oldPassword, newPassword } = req.body;
+
+  if (!email || !oldPassword || !newPassword) {
+    return res.status(400).json({ message: 'Email, old password, and new password are required' });
+  }
+
+  try {
+    const [rows]: any = await pool.execute('SELECT * FROM eventsupervisor WHERE email = ?', [email]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Event Supervisor not found' });
+    }
+
+    const eventSupervisor: IEventSupervisor = rows[0];
+
+    const isMatch = await bcrypt.compare(oldPassword, eventSupervisor.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Old password is incorrect' });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    await pool.execute('UPDATE eventsupervisor SET password = ? WHERE email = ?', [hashedNewPassword, email]);
+
+    res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error changing password', error });
+  }
+};
+
+
 
 export const loginEventSupervisor = async (req: Request, res: Response) => {
   const { username, password } = req.body;
@@ -490,9 +598,6 @@ export const registerUser = async (req: Request, res: Response) => {
         pass: "injgdluouhraowjt", // Email password from environment variable
       },
     });
-
-    // console.log("EMAIL_USER: ", process.env.EMAIL_USER);
-console.log("EMAIL_PASS: ", process.env.password);
 
     const mailOptions = {
       from: '"EPOCH SCORING SYSTEM" <ecinemabooking387@gmail.com>',
