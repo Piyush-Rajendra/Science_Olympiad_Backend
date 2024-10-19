@@ -23,8 +23,6 @@ export interface ITournament {
 export interface IEvent {
   event_id: number;
   name: string;
-  location: string;
-  eventSupervisor_id: number;
   tournament_id: number;
   scoringAlg: String;
   description: String; 
