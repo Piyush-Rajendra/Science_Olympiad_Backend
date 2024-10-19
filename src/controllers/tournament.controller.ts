@@ -143,3 +143,17 @@ export const getAllTournaments = async (req: Request, res: Response) => {
     }
 };
 
+export const getCurrentTournamentIds = async (req: Request, res: Response) => {
+    try {
+      // Query to get the IDs of all current tournaments
+      const [tournamentIds] = await pool.execute(
+        'SELECT tournament_id FROM tournament WHERE isCurrent = true'
+      );
+  
+      res.status(200).json(tournamentIds);
+    } catch (error) {
+      console.error('Error fetching current tournament IDs:', error);
+      res.status(500).json({ message: 'Error fetching current tournament IDs', error: error.message });
+    }
+  };
+
