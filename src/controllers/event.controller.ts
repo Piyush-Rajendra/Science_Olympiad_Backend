@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import pool from '../../config/db.config';
 import { IEvent, IEventSuperVisorEvent } from '../models/data.models'; // Adjust the import path
+import { RowDataPacket } from 'mysql2';
+import { FieldPacket } from 'mysql2';
 
 export const addEvent = async (req: Request, res: Response) => {
     const { name, tournament_id, scoringAlg, description, status } = req.body;
@@ -403,6 +405,74 @@ export const getTotalAbsentByEvent = async (req: Request, res: Response) => {
     } catch (error) {
         console.error('Error getting absent team count:', error);
         res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+
+export const getEventStatusByEventId = async (req: Request, res: Response) => {
+    const eventId = parseInt(req.params.eventId);
+
+    if (isNaN(eventId)) {
+        return res.status(400).json({ message: 'Invalid event ID' });
+    }
+
+    try {
+        const [result] = await pool.execute(
+            `SELECT
+                CASE
+                    WHEN COUNT(*) = 0 THEN 'Not Available'
+                    WHEN SUM(CASE WHEN Score IS NULL THEN 1 ELSE 0 END) = COUNT(*) THEN 'Not Started'
+                    WHEN SUM(CASE WHEN Score IS NOT NULL THEN 1 ELSE 0 END) > 0 AND SUM(CASE WHEN Score IS NULL THEN 1 ELSE 0 END) > 0 THEN 'In Progress'
+                    ELSE 'For Review'
+                END AS status
+            FROM TeamTimeBlock
+            WHERE Event_ID = ?`,
+            [eventId]
+        );
+
+        const status = result[0]?.status || 'Not Available';
+
+        res.status(200).json({ status });
+    } catch (error) {
+        console.error('Error retrieving event status:', error);
+        res.status(500).json({ message: 'Error retrieving event status', error: error.message });
+    }
+};
+
+export const getScorePercentageByEventId = async (req: Request, res: Response) => {
+    const eventId = parseInt(req.params.eventId);
+
+    if (isNaN(eventId)) {
+        return res.status(400).json({ message: 'Invalid event ID' });
+    }
+
+    try {
+        const [result] = await pool.execute(
+            `SELECT
+                COUNT(CASE WHEN Score IS NOT NULL THEN 1 END) AS nonNullScoreCount,
+                COUNT(*) AS totalScoreCount
+            FROM TeamTimeBlock
+            WHERE Event_ID = ?`,
+            [eventId]
+        );
+
+        const nonNullScoreCount = result[0]?.nonNullScoreCount || 0;
+        const totalScoreCount = result[0]?.totalScoreCount || 0;
+
+        let scorePercentage: number;
+
+        if (totalScoreCount === 0) {
+            scorePercentage = 0; // If no scores exist
+        } else if (nonNullScoreCount === totalScoreCount) {
+            scorePercentage = 100; // All scores are non-null
+        } else {
+            scorePercentage = (nonNullScoreCount / totalScoreCount) * 100; // Calculate percentage of non-null scores
+        }
+
+        res.status(200).json({ scorePercentage });
+    } catch (error) {
+        console.error('Error retrieving non-null score count:', error);
+        res.status(500).json({ message: 'Error retrieving non-null score count', error: error.message });
     }
 };
 

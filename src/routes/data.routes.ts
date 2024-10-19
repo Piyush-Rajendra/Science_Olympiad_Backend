@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { addTournament, getAllTournaments, editTournament, deleteTournament, getTourneyById, getCurrentTournamentIds, getCurrentTournamentsByGroupId } from '../controllers/tournament.controller';
-import { updateEventStatus, getEventStatus, getEventSupervisorEventById, updateEventForEventSupervisor, removeEventFromEventSupervisor, addEvent, deleteEvent, editEvent, getAllEvents, getEventById, getEventsByEventSupervisorId, getEventsByTournamentId, addEventToEventSupervisor, getEventsByEventSupervisor, getEventsBySupervisorAndTournamentId, getTotalAbsentByEvent } from '../controllers/event.controller';
+import { updateEventStatus, getEventStatus, getEventSupervisorEventById, updateEventForEventSupervisor, removeEventFromEventSupervisor, addEvent, deleteEvent, editEvent, getAllEvents, getEventById, getEventsByEventSupervisorId, getEventsByTournamentId, addEventToEventSupervisor, getEventsByEventSupervisor, getEventsBySupervisorAndTournamentId, getTotalAbsentByEvent, getEventStatusByEventId, getScorePercentageByEventId } from '../controllers/event.controller';
 import { addSchool, deleteSchool, editSchool, getAllSchools, getSchoolById } from '../controllers/school.controller';
 import { addTeam, deleteTeam, editTeam, getAllTeams, getTeamById, getTeamsBySchoolId } from '../controllers/team.controllers';
 import { addScore, deleteScore, editScore, getScoreById, getScoresByEventId, getScoresBySchoolGroupId, getScoresBySchoolId, getScoresByTeamId, getScoresByTournamentId } from '../controllers/score.controllers';
@@ -66,6 +66,8 @@ router.get('/get-event-supervisor-event/:id', getEventSupervisorEventById);
 router.put('/update-EventSupervisorsEvent/:eventSuperVisorEventID', updateEventForEventSupervisor);
 router.get('/event/:event_id/status', getEventStatus);
 router.put('/event/:event_id/status', updateEventStatus);
+router.get('/get-event-status/:eventId', getEventStatusByEventId); 
+router.get('/get-score-percentage/:eventId', getScorePercentageByEventId);
 
 // Timeblock
 router.post('/add-timeblocks', addTimeblocks);
