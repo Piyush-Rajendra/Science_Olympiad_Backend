@@ -45,7 +45,7 @@ export const deleteSchoolGroup = async (req: Request, res: Response) => {
 
     try {
         // Deleting group entry from table
-        pool.execute('DELETE FROM SchoolGroup WHERE SchoolGroupID = ?', [School_ID]);
+        pool.execute('DELETE FROM SchoolGroup WHERE school_group_id = ?', [School_ID]);
 
         // Searching admins with the same group_id to set null
         pool.execute('UPDATE admin SET Group_ID = null WHERE Group_ID = ?' [School_ID]);
@@ -63,7 +63,7 @@ export const editSchoolGroup = async (req: Request, res: Response) => {
     if (!School_ID) {
         return res.status(400).json ({ message: 'Group is required'})
     }
-    const [name] = req.body;
+    const name = req.body;
     if (!name) {
         return res.status(400).json({ message: 'name required'})
     }
