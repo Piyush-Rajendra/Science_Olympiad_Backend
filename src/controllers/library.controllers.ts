@@ -6,7 +6,12 @@ import { RowDataPacket } from 'mysql2';
 
 // Configure multer for file uploads
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+// Configure multer for file uploads with a size limit of 4GB
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 500 * 1024 * 1024 } // 16 MB limit
+});
+
 
 // Function to upload or update a PDF for a given schoolGroup_id
 export const uploadOrUpdatePDF = async (req: Request, res: Response) => {
@@ -26,7 +31,7 @@ export const uploadOrUpdatePDF = async (req: Request, res: Response) => {
 
         // Check if an entry already exists for the given schoolGroup_id
         const [rows]: [RowDataPacket[], any] = await pool.execute(
-            'SELECT * FROM resource_library WHERE schoolGroup_id = ?',
+            'SELECT * FROM resourcelibrary WHERE schoolGroup_id = ?',
             [schoolGroup_id]
         );
 
@@ -35,7 +40,7 @@ export const uploadOrUpdatePDF = async (req: Request, res: Response) => {
         if (existingEntry.length > 0) {
             // Update the existing entry with the new PDF data
             await pool.execute(
-                'UPDATE resource_library SET pdf_input = ? WHERE schoolGroup_id = ?',
+                'UPDATE resourcelibrary SET pdf_input = ? WHERE schoolGroup_id = ?',
                 [pdfData, schoolGroup_id]
             );
 
@@ -43,7 +48,7 @@ export const uploadOrUpdatePDF = async (req: Request, res: Response) => {
         } else {
             // Insert a new entry if none exists for the given schoolGroup_id
             const [result]: any = await pool.execute(
-                'INSERT INTO resource_library (schoolGroup_id, pdf_input) VALUES (?, ?)',
+                'INSERT INTO resourcelibrary (schoolGroup_id, pdf_input) VALUES (?, ?)',
                 [schoolGroup_id, pdfData]
             );
 
@@ -67,7 +72,7 @@ export const getPDFBySchoolGroupId = async (req: Request, res: Response) => {
     try {
         // Query the database for the PDF
         const [rows]: [RowDataPacket[], any] = await pool.execute(
-            'SELECT pdf_input FROM resource_library WHERE schoolGroup_id = ?',
+            'SELECT pdf_input FROM resourcelibrary WHERE schoolGroup_id = ?',
             [schoolGroup_id]
         );
 

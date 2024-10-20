@@ -7,7 +7,7 @@ import { addScore, deleteScore, editScore, getScoreById, getScoresByEventId, get
 import { updateTimeBlockStatus, getTimeBlockStatus, addTimeblocks, editTimeblock, deleteTimeblock, getTimeblocksByEventId, getTimeblocksByTournamentId} from '../controllers/timeblock.controller'
 import { addSchoolGroup, deleteSchoolGroup, editSchoolGroup, getAllSchoolGroups } from '../controllers/schoolgroups.controllers'
 import { getTeamTimeBlockWithSchoolById,getUniqueIdByTeamTimeBlockId, updateAttendStatus, getAttendStatus, updateTeamTimeBlockComment, getTeamTimeBlockComment, addTeamTimeBlock, deleteTeamTimeBlock, editTeamTimeBlock, getTeamTimeBlockById, getTeamTimeBlocksByEventId, getTeamTimeBlocksByTeamId, getTeamTimeBlocksByTimeBlockId } from '../controllers/teamtimeblock.controller';
-
+import { getPDFBySchoolGroupId, uploadOrUpdatePDF, uploadMiddleware, createQuestion, deleteQuestion, addAnswer, getQuestion, getAnswersBySchoolGroupId} from '../controllers/library.controllers';
 
 const router = Router();
 
@@ -101,5 +101,15 @@ router.put('/edit-schoolgroup/:id', editSchoolGroup);
 router.delete('/delete-schoolgroup/:id', deleteSchoolGroup);
 router.get('/get-schoolgroups-all', getAllSchoolGroups);
 
+//Resource Library - General Rules
+router.get('/get-pdf/:schoolGroup_id', getPDFBySchoolGroupId);
+router.post('/upload-pdf', uploadMiddleware, uploadOrUpdatePDF);
+
+//Resource Library - Q and A
+router.post('/questions', createQuestion);
+router.delete('/questions/:QandA_id', deleteQuestion);
+router.put('/questions/:QandA_id/answer', addAnswer);
+router.get('/questions/:QandA_id', getQuestion);
+router.get('/answers/schoolGroup/:schoolGroup_id', getAnswersBySchoolGroupId);
 
 export default router;
