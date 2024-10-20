@@ -15,6 +15,7 @@
     email: string;
     password: string;
     isAttendance: boolean;
+    passwordChanged: boolean;
     school_id: number | null;
   }
 

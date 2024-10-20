@@ -1,11 +1,12 @@
 import { Router } from 'express';
-import { addTournament, getAllTournaments, editTournament, deleteTournament, getTourneyById } from '../controllers/tournament.controller';
-import { getEventSupervisorEventById, updateEventForEventSupervisor, removeEventFromEventSupervisor, addEvent, deleteEvent, editEvent, getAllEvents, getEventById, getEventsByEventSupervisorId, getEventsByTournamentId, addEventToEventSupervisor, getEventsByEventSupervisor } from '../controllers/event.controller';
+import { addTournament, getAllTournaments, editTournament, deleteTournament, getTourneyById, getCurrentTournamentIds, getCurrentTournamentsByGroupId } from '../controllers/tournament.controller';
+import { updateEventStatus, getEventStatus, getEventSupervisorEventById, updateEventForEventSupervisor, removeEventFromEventSupervisor, addEvent, deleteEvent, editEvent, getAllEvents, getEventById, getEventsByEventSupervisorId, getEventsByTournamentId, addEventToEventSupervisor, getEventsByEventSupervisor, getEventsBySupervisorAndTournamentId, getTotalAbsentByEvent } from '../controllers/event.controller';
 import { addSchool, deleteSchool, editSchool, getAllSchools, getSchoolById } from '../controllers/school.controller';
 import { addTeam, deleteTeam, editTeam, getAllTeams, getTeamById, getTeamsBySchoolId } from '../controllers/team.controllers';
 import { addScore, deleteScore, editScore, getScoreById, getScoresByEventId, getScoresBySchoolGroupId, getScoresBySchoolId, getScoresByTeamId, getScoresByTournamentId } from '../controllers/score.controllers';
-import { addTimeblocks, editTimeblock, deleteTimeblock, getTimeblocksByEventId, getTimeblocksByTournamentId, addTeamTimeblock, editTeamTimeblock, deleteTeamTimeblock, getTeamTimeblocksByTeamId, getTeamTimeblocskByTimeblockId } from '../controllers/timeblock.controller'
+import { updateTimeBlockStatus, getTimeBlockStatus, addTimeblocks, editTimeblock, deleteTimeblock, getTimeblocksByEventId, getTimeblocksByTournamentId} from '../controllers/timeblock.controller'
 import { addSchoolGroup, deleteSchoolGroup, editSchoolGroup, getAllSchoolGroups } from '../controllers/schoolgroups.controllers'
+import { updateAttendStatus, getAttendStatus, updateTeamTimeBlockComment, getTeamTimeBlockComment, addTeamTimeBlock, deleteTeamTimeBlock, editTeamTimeBlock, getTeamTimeBlockById, getTeamTimeBlocksByEventId, getTeamTimeBlocksByTeamId, getTeamTimeBlocksByTimeBlockId, getTeamTimeBlockWithSchoolById, getUniqueIdByTeamTimeBlockId } from '../controllers/teamtimeblock.controller';
 
 
 const router = Router();
@@ -16,6 +17,9 @@ router.get('/get-tournaments', getAllTournaments);
 router.put('/edit-tournament/:id', editTournament);
 router.delete('/delete-tournament/:id', deleteTournament);
 router.get('/get-tournament/:id', getTourneyById);
+router.get('/get-current-tournaments', getCurrentTournamentIds);
+router.get('/get-current-tournaments/:groupId', getCurrentTournamentsByGroupId)
+
 
 //Event 
 router.post('/add-event', addEvent);
@@ -25,6 +29,8 @@ router.get('/get-events-by-tournament/:tournamentId', getEventsByTournamentId);
 router.get('/get-events-by-supervisor/:supervisorId', getEventsByEventSupervisorId);
 router.delete('/delete-event/:id', deleteEvent);
 router.get('/get-event/:id', getEventById);
+router.get('/get-events/supervisor/:supervisorId/tournament/:tournamentId', getEventsBySupervisorAndTournamentId);
+router.get('/event/:eventId/absent-teams', getTotalAbsentByEvent);
 
 //School
 router.post('/add-school', addSchool);
@@ -58,6 +64,8 @@ router.delete('/delete-EventSuperVisorsEvent', removeEventFromEventSupervisor);
 router.get('/get-event-supervisor/:id/events', getEventsByEventSupervisor);
 router.get('/get-event-supervisor-event/:id', getEventSupervisorEventById);
 router.put('/update-EventSupervisorsEvent/:eventSuperVisorEventID', updateEventForEventSupervisor);
+router.get('/event/:event_id/status', getEventStatus);
+router.put('/event/:event_id/status', updateEventStatus);
 
 // Timeblock
 router.post('/add-timeblocks', addTimeblocks);
@@ -65,13 +73,23 @@ router.put('/edit-timeblock/:id', editTimeblock);
 router.delete('/delete-timeblock/:id', deleteTimeblock);
 router.get('/get-timeblock-by-event/:id', getTimeblocksByEventId);
 router.get('/get-timeblocks-by-tournament/:id', getTimeblocksByTournamentId);
+router.get('/timeblock/:TimeBlock_ID/status', getTimeBlockStatus);
+router.put('/timeblock/:TimeBlock_ID/status', updateTimeBlockStatus);
 
 // Team Timeblocks
-router.post('/add-team-timeblock', addTeamTimeblock);
-router.put('/edit-team-timeblock/:id', editTeamTimeblock);
-router.delete('/delete-team-timeblock/:id', deleteTeamTimeblock);
-router.get('/get-team-timeblocks-by-team/:id', getTeamTimeblocksByTeamId);
-router.get('/get-team-timeblocks-by-timeblock/:id', getTeamTimeblocskByTimeblockId);
+router.post('/add-team-timeblock', addTeamTimeBlock);
+router.put('/edit-team-timeblock/:id', editTeamTimeBlock);
+router.delete('/delete-team-timeblock/:id', deleteTeamTimeBlock);
+router.get('/get-team-timeblocks-by-id/:id', getTeamTimeBlockById);
+router.get('/get-team-timeblocks-by-team/:teamId', getTeamTimeBlocksByTeamId);
+router.get('/get-team-timeblocks-by-timeblock/:timeBlockId', getTeamTimeBlocksByTimeBlockId);
+router.get('/get-team-timeblocks-by-event/:eventId', getTeamTimeBlocksByEventId);
+router.get('/team-timeblock/:TeamTimeBlock_ID/comment', getTeamTimeBlockComment);
+router.put('/team-timeblock/:TeamTimeBlock_ID/comment', updateTeamTimeBlockComment);
+router.get('/teamtimeblock/:teamTimeBlockId/attend', getAttendStatus);
+router.put('/teamtimeblock/:teamTimeBlockId/attend', updateAttendStatus);
+router.get('/team-timeblocks-get-school-name/:id', getTeamTimeBlockWithSchoolById);
+router.get('/team-timeblocks/:id/unique-id', getUniqueIdByTeamTimeBlockId);
 
 // School Groups
 router.post('/add-schoolgroup', addSchoolGroup);

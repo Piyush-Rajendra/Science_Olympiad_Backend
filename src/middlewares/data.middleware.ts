@@ -82,10 +82,10 @@ export const createDataTables = async () => {
         CREATE TABLE IF NOT EXISTS Event (
             event_id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
-            location VARCHAR(255) NOT NULL,
             tournament_id INT,
             scoringAlg VARCHAR(255) NOT NULL,
             description TEXT,
+            status INT,
             FOREIGN KEY (tournament_id) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
     `);
@@ -100,6 +100,7 @@ export const createDataTables = async () => {
             TimeEnd DATETIME,
             Building TEXT,
             RoomNumber INT,
+            Status INT,
             FOREIGN KEY (Tournament_ID) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE,
             FOREIGN KEY (Event_ID) REFERENCES Event(event_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
@@ -111,9 +112,12 @@ export const createDataTables = async () => {
             TeamTimeBlock_ID INT AUTO_INCREMENT PRIMARY KEY,
             TimeBlock_ID INT,
             Team_ID INT,
+            Event_ID INT, 
             Attend BOOLEAN NOT NULL,
             Comment TEXT,
             Tier INT,
+            Score FLOAT,
+            FOREIGN KEY (Event_ID) REFERENCES Event(event_id) ON DELETE CASCADE ON UPDATE CASCADE,
             FOREIGN KEY (Team_ID) REFERENCES Team(team_id) ON DELETE CASCADE ON UPDATE CASCADE,
             FOREIGN KEY (TimeBlock_ID) REFERENCES TimeBlock(TimeBlock_ID) ON DELETE CASCADE ON UPDATE CASCADE
         );

@@ -3,7 +3,12 @@ import { register, login, getAllUsers, registerAdmin, loginAdmin, getAllAdmins, 
     updateSuperAdmin, deleteSuperAdmin, loginEventSupervisor, registerEventSupervisor, 
     getAllEventSupervisors, updateEventSupervisor, deleteAdmin, deleteEventSupervisor, 
     getAllSuperAdmins, getSuperAdminById, updateUser, registerUser, loginUser, deleteuser, 
-    getAdminById, getEventSupervisorById, getUserById } from '../controllers/auth.controllers';
+    getAdminById, getEventSupervisorById, getUserById, 
+    changePassword,
+    forgotPassword,
+    resetPassword,
+    changePasswordEventSupervisor,
+    changePasswordAdmin} from '../controllers/auth.controllers';
 import { authenticateJWT } from '../middlewares/extractJWT';
 
 const router = Router();
@@ -18,17 +23,24 @@ router.delete('/deleteSuperAdmin/:id', deleteSuperAdmin)
 router.post('/registerAdmin',registerAdmin);
 router.post('/adminLogin', loginAdmin);
 router.delete('/deleteAdmin/:id',deleteAdmin)
+router.post('/change-admin-password', changePasswordAdmin);
+
 
 // EventSupervisor
 router.post('/registerES',registerEventSupervisor);
 router.post('/esLogin', loginEventSupervisor);
 router.delete('/deleteEventSupervisor/:id',deleteEventSupervisor)
+router.post('/change-password', changePasswordEventSupervisor);
+
 
 //User
 router.post('/registeruser', registerUser);
 router.post('/userLogin', loginUser);
-router.delete('/delteUser/:id',deleteuser)
-
+router.delete('/delteUser/:id',deleteuser);
+router.post('/changePassword', changePassword)
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
+// Route to change admin password
 
 
 // Protected Routes
