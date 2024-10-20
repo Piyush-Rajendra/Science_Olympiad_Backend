@@ -11,11 +11,16 @@ export const addTimeblocks = async (req: Request, res: Response) => {
     }
 
     try {
+        const [startHour, startMinute] = startTime.split(':').map(Number);
+        const durationMs = duration * 60 * 1000;
+        const breakTimeMs = breakTime * 60 * 1000;
 
-        const startInTime = new Date(startTime).getTime();
+        const date = new Date()
+        date.setHours(startHour, startMinute, 0, 0);
+        const startInTime = date.getTime()
         for (let i = 0; i < amount; i++) {
-            const newStart = new Date(startInTime + (i * duration) + (i * breakTime));
-            const newEnd = new Date(newStart.getTime() + (duration));
+            const newStart = new Date(startInTime + (i * durationMs) + (i * breakTimeMs));
+            const newEnd = new Date(newStart.getTime() + (durationMs));
 
             const newTimeblock: ITimeBlock = {
                 timeBlock_id: 0,
