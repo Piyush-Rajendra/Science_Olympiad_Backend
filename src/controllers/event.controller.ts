@@ -406,3 +406,46 @@ export const getTotalAbsentByEvent = async (req: Request, res: Response) => {
     }
 };
 
+export const checkAndUpdateEventStatus = async (req: Request, res: Response) => {
+    const { eventId } = req.params;
+  
+    try {
+      // Get all TimeBlock statuses for the given event
+      const [timeBlocks]: any = await pool.execute(
+        `SELECT Status FROM TimeBlock WHERE Event_ID = ?`,
+        [eventId]
+      );
+  
+      if (!timeBlocks.length) {
+        return res.status(404).json({ message: 'No time blocks found for this event' });
+      }
+  
+      const allStatuses = timeBlocks.map((block: any) => block.Status);
+  
+      // Logic for updating event status based on TimeBlock statuses
+      let newEventStatus;
+  
+      if (allStatuses.every((status: number) => status === 0)) {
+        newEventStatus = 0;
+      } else if (allStatuses.every((status: number) => status === 2)) {
+        newEventStatus = 2;
+      }
+      else if (allStatuses.some((status: number) => status >= 1)) {
+        newEventStatus = 1;
+      }  else {
+        return res.status(400).json({ message: 'Invalid status combination' });
+      }
+  
+      // Update the Event status
+      await pool.execute(
+        `UPDATE Event SET Status = ? WHERE event_id = ?`,
+        [newEventStatus, eventId]
+      );
+  
+      res.status(200).json({ message: 'Event status updated successfully', newEventStatus });
+    } catch (error) {
+      console.error('Error updating event status:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  };
+
