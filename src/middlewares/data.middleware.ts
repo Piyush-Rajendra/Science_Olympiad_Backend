@@ -21,7 +21,7 @@ export const createDataTables = async () => {
         username VARCHAR(255) NOT NULL,
         password VARCHAR(255) NOT NULL,
         isTournamentDirector BOOLEAN NOT NULL DEFAULT FALSE,
-        FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) 
+        FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE
       )
     `);
 
@@ -35,7 +35,7 @@ export const createDataTables = async () => {
           email VARCHAR(255) NOT NULL,
           username VARCHAR(255) NOT NULL,
           password VARCHAR(255) NOT NULL,
-          FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id)
+          FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE
         )
     `);
 
@@ -46,7 +46,7 @@ export const createDataTables = async () => {
         school_group_id INT,
         name VARCHAR(255) NOT NULL,
         flight VARCHAR(50) NOT NULL,
-        FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE SET NULL ON UPDATE CASCADE
+        FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
     `);
     
@@ -73,7 +73,8 @@ export const createDataTables = async () => {
             name VARCHAR(255) NOT NULL,
             date DATE NOT NULL,
             location VARCHAR(255) NOT NULL,
-            description TEXT
+            description TEXT,
+            FOREIGN KEY (group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
     `);
 
