@@ -420,13 +420,16 @@ export const getEventStatusByEventId = async (req: Request, res: Response) => {
         const [result] = await pool.execute(
             `SELECT
                 CASE
-                    WHEN COUNT(*) = 0 THEN 'Not Available'
-                    WHEN SUM(CASE WHEN Score IS NULL THEN 1 ELSE 0 END) = COUNT(*) THEN 'Not Started'
-                    WHEN SUM(CASE WHEN Score IS NOT NULL THEN 1 ELSE 0 END) > 0 AND SUM(CASE WHEN Score IS NULL THEN 1 ELSE 0 END) > 0 THEN 'In Progress'
+                    WHEN e.status = 3 THEN 'Completed'  -- Check if event status is 3
+                    WHEN COUNT(ttb.TeamTimeBlock_ID) = 0 THEN 'Not Available'
+                    WHEN SUM(CASE WHEN ttb.Score IS NULL THEN 1 ELSE 0 END) = COUNT(ttb.TeamTimeBlock_ID) THEN 'Not Started'
+                    WHEN SUM(CASE WHEN ttb.Score IS NOT NULL THEN 1 ELSE 0 END) > 0 
+                         AND SUM(CASE WHEN ttb.Score IS NULL THEN 1 ELSE 0 END) > 0 THEN 'In Progress'
                     ELSE 'For Review'
                 END AS status
-            FROM TeamTimeBlock
-            WHERE Event_ID = ?`,
+            FROM Event e
+            LEFT JOIN TeamTimeBlock ttb ON e.event_id = ttb.Event_ID
+            WHERE e.event_id = ?`,
             [eventId]
         );
 
@@ -438,6 +441,7 @@ export const getEventStatusByEventId = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Error retrieving event status', error: error.message });
     }
 };
+
 
 export const getScorePercentageByEventId = async (req: Request, res: Response) => {
     const eventId = parseInt(req.params.eventId);
@@ -473,6 +477,34 @@ export const getScorePercentageByEventId = async (req: Request, res: Response) =
     } catch (error) {
         console.error('Error retrieving non-null score count:', error);
         res.status(500).json({ message: 'Error retrieving non-null score count', error: error.message });
+    }
+};
+
+export const finalizeEventByEventId = async (req: Request, res: Response) => {
+    const eventId = parseInt(req.params.eventId);
+
+    if (isNaN(eventId)) {
+        return res.status(400).json({ message: 'Invalid event ID' });
+    }
+
+    try {
+        // Execute the update query
+        const [result]: any = await pool.execute(
+            `UPDATE Event
+             SET status = 3
+             WHERE event_id = ?`,
+            [eventId]
+        );
+
+        // Access the affectedRows from the result object
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        res.status(200).json({ message: 'Event finalized successfully' });
+    } catch (error) {
+        console.error('Error finalizing event:', error);
+        res.status(500).json({ message: 'Error finalizing event', error: error.message });
     }
 };
 

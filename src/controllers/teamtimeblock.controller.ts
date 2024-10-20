@@ -69,8 +69,8 @@ export const editTeamTimeBlock = async (req: Request, res: Response) => {
                 event_id,
                 attend,
                 comment || '', // Default to empty string if comment is not provided
-                tier || 0, // Default tier to 0 if not provided
-                score || 0.0, // Default score to 0.0 if not provided
+                tier || 1, // Default tier to 1 if not provided
+                score !== undefined ? score : null, // Use score directly if it's defined, else default to null
                 teamTimeBlockId, // Use the team time block ID from the URL
             ]
         );
@@ -88,6 +88,7 @@ export const editTeamTimeBlock = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Error updating team time block', error: error.message });
     }
 };
+
 
 export const deleteTeamTimeBlock = async (req: Request, res: Response) => {
     const teamTimeBlockId = parseInt(req.params.id); // Get team time block ID from the URL
