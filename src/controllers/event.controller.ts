@@ -5,7 +5,7 @@ import { RowDataPacket } from 'mysql2';
 import { FieldPacket } from 'mysql2';
 
 export const addEvent = async (req: Request, res: Response) => {
-    const { name, tournament_id, scoringAlg, description, status } = req.body;
+    const { name, tournament_id, scoringAlg, description, status, scoreStatus } = req.body;
   
     // Validate required fields
     if (!name || !tournament_id || !scoringAlg) {
@@ -20,17 +20,19 @@ export const addEvent = async (req: Request, res: Response) => {
       scoringAlg,
       description: description || "", // Use provided description or default to empty string
       status,
+      scoreStatus,
     };
   
     try {
       const [result] = await pool.execute(
-        'INSERT INTO Event (name, tournament_id, scoringAlg, description, status) VALUES (?, ?, ?, ?, ?)',
+        'INSERT INTO Event (name, tournament_id, scoringAlg, description, status, scoreStatus) VALUES (?, ?, ?, ?, ?, ?)',
         [
           newEvent.name,
           newEvent.tournament_id,
           newEvent.scoringAlg,
           newEvent.description,
           newEvent.status,
+          newEvent.scoreStatus,
         ]
       );
   
@@ -51,13 +53,14 @@ export const addEvent = async (req: Request, res: Response) => {
       scoringAlg = null, // Optional field, set to null if not provided
       description = null, // Optional field, set to null if not provided
       status = null,
+      scoreStatus = null,
     } = req.body;
   
 
     try {
       const [result] = await pool.execute(
         `UPDATE Event 
-         SET name = ?, tournament_id = ?, scoringAlg = ?, description = ?, status = ?
+         SET name = ?, tournament_id = ?, scoringAlg = ?, description = ?, status = ?, scoreStatus = ?
          WHERE event_id = ?`,
         [
           name,
@@ -66,6 +69,7 @@ export const addEvent = async (req: Request, res: Response) => {
           description, // This can be null if not provided
           event_id, // Use the event ID from the URL
           status,
+          scoreStatus,
         ]
       );
   
@@ -419,20 +423,20 @@ export const getEventStatusByEventId = async (req: Request, res: Response) => {
         const [result] = await pool.execute(
             `SELECT
                 CASE
-                    WHEN e.status = 3 THEN 'Completed'  -- Check if event status is 3
+                    WHEN e.scoreStatus = 3 THEN 'Completed'  -- Check if event scoreStatus is 3
                     WHEN COUNT(ttb.TeamTimeBlock_ID) = 0 THEN 'Not Available'
                     WHEN SUM(CASE WHEN ttb.Score IS NULL THEN 1 ELSE 0 END) = COUNT(ttb.TeamTimeBlock_ID) THEN 'Not Started'
                     WHEN SUM(CASE WHEN ttb.Score IS NOT NULL THEN 1 ELSE 0 END) > 0 
                          AND SUM(CASE WHEN ttb.Score IS NULL THEN 1 ELSE 0 END) > 0 THEN 'In Progress'
                     ELSE 'For Review'
-                END AS status
+                END AS scoreStatus
             FROM Event e
             LEFT JOIN TeamTimeBlock ttb ON e.event_id = ttb.Event_ID
-            WHERE e.event_id = ?`,
+            WHERE e.event_id = ? AND ttb.Attend = 1`, // Include only present teams
             [eventId]
         );
 
-        const status = result[0]?.status || 'Not Available';
+        const status = result[0]?.scoreStatus || 'Not Available';
 
         res.status(200).json({ status });
     } catch (error) {
@@ -440,6 +444,7 @@ export const getEventStatusByEventId = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Error retrieving event status', error: error.message });
     }
 };
+
 
 
 export const getScorePercentageByEventId = async (req: Request, res: Response) => {
@@ -490,7 +495,7 @@ export const finalizeEventByEventId = async (req: Request, res: Response) => {
         // Execute the update query
         const [result]: any = await pool.execute(
             `UPDATE Event
-             SET status = 3
+             SET scoreStatus = 3
              WHERE event_id = ?`,
             [eventId]
         );
@@ -518,7 +523,7 @@ export const getEventsByTournamentAndSupervisor = async (req: Request, res: Resp
     try {
         // Execute the select query
         const [events] = await pool.execute(
-            `SELECT E.event_id, E.name, E.scoringAlg, E.description, E.status
+            `SELECT E.event_id, E.name, E.scoringAlg, E.description, E.status, E.scoreStatus
             FROM Event E
             JOIN EventSuperVisorEvent ES ON E.event_id = ES.event_id
             JOIN Tournament T ON E.tournament_id = T.tournament_id
