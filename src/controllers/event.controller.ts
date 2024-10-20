@@ -456,7 +456,7 @@ export const getScorePercentageByEventId = async (req: Request, res: Response) =
                 COUNT(CASE WHEN Score IS NOT NULL THEN 1 END) AS nonNullScoreCount,
                 COUNT(*) AS totalScoreCount
             FROM TeamTimeBlock
-            WHERE Event_ID = ?`,
+            WHERE Event_ID = ? AND Attend = 1`, // Only include teams that are present
             [eventId]
         );
 
@@ -466,9 +466,9 @@ export const getScorePercentageByEventId = async (req: Request, res: Response) =
         let scorePercentage: number;
 
         if (totalScoreCount === 0) {
-            scorePercentage = 0; // If no scores exist
+            scorePercentage = 0; // If no present scores exist
         } else if (nonNullScoreCount === totalScoreCount) {
-            scorePercentage = 100; // All scores are non-null
+            scorePercentage = 100; // All present scores are non-null
         } else {
             scorePercentage = (nonNullScoreCount / totalScoreCount) * 100; // Calculate percentage of non-null scores
         }
@@ -505,6 +505,36 @@ export const finalizeEventByEventId = async (req: Request, res: Response) => {
     } catch (error) {
         console.error('Error finalizing event:', error);
         res.status(500).json({ message: 'Error finalizing event', error: error.message });
+    }
+};
+
+export const getEventsByTournamentAndSupervisor = async (req: Request, res: Response) => {
+    const tournamentId = parseInt(req.params.tournamentId);
+    const eventSupervisorId = parseInt(req.params.eventSupervisorId);
+
+    if (isNaN(tournamentId) || isNaN(eventSupervisorId)) {
+        return res.status(400).json({ message: 'Invalid tournament or event supervisor ID' });
+    }
+
+    try {
+        // Execute the select query
+        const [events] = await pool.execute(
+            `SELECT E.event_id, E.name, E.scoringAlg, E.description, E.status
+            FROM Event E
+            JOIN EventSuperVisorEvent ES ON E.event_id = ES.event_id
+            JOIN Tournament T ON E.tournament_id = T.tournament_id
+            WHERE T.tournament_id = ? AND ES.eventSupervisor_id = ?`,
+            [tournamentId, eventSupervisorId]
+        ) as [Event[], any];
+
+        if (events.length === 0) {
+            return res.status(404).json({ message: 'No events found' });
+        }
+
+        res.status(200).json(events);
+    } catch (error) {
+        console.error('Error retrieving events:', error);
+        res.status(500).json({ message: 'Error retrieving events', error: error.message });
     }
 };
 
