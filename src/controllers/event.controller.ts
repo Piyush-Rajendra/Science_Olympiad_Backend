@@ -432,7 +432,7 @@ export const getEventStatusByEventId = async (req: Request, res: Response) => {
                 END AS scoreStatus
             FROM Event e
             LEFT JOIN TeamTimeBlock ttb ON e.event_id = ttb.Event_ID
-            WHERE e.event_id = ?`,
+            WHERE e.event_id = ? AND ttb.Attend = 1`, // Include only present teams
             [eventId]
         );
 
@@ -444,6 +444,7 @@ export const getEventStatusByEventId = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Error retrieving event status', error: error.message });
     }
 };
+
 
 
 export const getScorePercentageByEventId = async (req: Request, res: Response) => {
