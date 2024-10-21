@@ -647,7 +647,7 @@ export const loginEventSupervisor = async (req: Request, res: Response) => {
 
 export const getAllEventSupervisors = async (req: Request, res: Response) => {
   try {
-    const [rows]: any = await pool.execute('SELECT school_group_id, email, username, password,firstName,lastName FROM eventsupervisor');
+    const [rows]: any = await pool.execute('SELECT eventSupervisor_id, school_group_id, email, username, password,firstName,lastName FROM eventsupervisor');
     res.status(200).json(rows);
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving event supervisors', error });
