@@ -6,47 +6,52 @@ import { Workbook } from 'exceljs'; // Import Workbook from exceljs
 import ExcelJS from 'exceljs';
 
 export const addTournament = async (req: Request, res: Response) => {
-  const { name, division, group_id, isCurrent, NumOfTimeBlocks, location, description, date } = req.body;
-
-  // Validate required fields
-  if (!name || !division ) {
-    return res.status(400).json({ message: 'Name, division are required' });
-  }
-
-  // Create the new tournament object
-  const newTournament: ITournament = {
-    tournament_id: 0, // Auto-increment handled by the database
-    group_id: group_id, // Use the group_id from the request body
-    isCurrent: isCurrent, // Set this according to your application logic
-    division: division, // Use the division from the request body
-    NumOfTimeBlocks: NumOfTimeBlocks || 0, // Use the NumOfTimeBlocks from the request body
-    name: name, // Use the name from the request body
-    date: date || new Date(), // Set to current date or a specific date
-    location: location || "", // Use the location from the request body or default
-    description: description || "", // Use the description from the request body or default to empty
+    const { name, division, group_id, isCurrent, NumOfTimeBlocks, location, description, date } = req.body;
+  
+    // Validate required fields
+    if (!name || !division) {
+      return res.status(400).json({ message: 'Name and division are required' });
+    }
+  
+    // Create the new tournament object
+    const newTournament: ITournament = {
+      tournament_id: 0, // Auto-increment handled by the database
+      group_id: group_id, // Use the group_id from the request body
+      isCurrent: isCurrent, // Set this according to your application logic
+      division: division, // Use the division from the request body
+      NumOfTimeBlocks: NumOfTimeBlocks || 0, // Use the NumOfTimeBlocks from the request body
+      name: name, // Use the name from the request body
+      date: date || new Date(), // Set to current date or a specific date
+      location: location || "", // Use the location from the request body or default
+      description: description || "", // Use the description from the request body or default to empty
+    };
+  
+    try {
+      const [result] = await pool.execute(
+        'INSERT INTO tournament (name, division, group_id, isCurrent, NumOfTimeBlocks, location, description, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+          newTournament.name,
+          newTournament.division,
+          newTournament.group_id,
+          newTournament.isCurrent,
+          newTournament.NumOfTimeBlocks,
+          newTournament.location,
+          newTournament.description,
+          newTournament.date,
+        ]
+      );
+  
+      // Retrieve the ID of the newly inserted tournament
+      const insertId = (result as any).insertId;
+  
+      // Return the newly created tournament ID
+      res.status(201).json({ message: 'Tournament added successfully', id: insertId });
+    } catch (error) {
+      console.error('Error adding tournament:', error); // Log the error for debugging
+      res.status(500).json({ message: 'Error adding tournament', error: error.message });
+    }
   };
-
-  try {
-    const [result] = await pool.execute(
-      'INSERT INTO tournament (name, division, group_id, isCurrent, NumOfTimeBlocks, location, description, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [
-        newTournament.name,
-        newTournament.division,
-        newTournament.group_id,
-        newTournament.isCurrent,
-        newTournament.NumOfTimeBlocks,
-        newTournament.location,
-        newTournament.description,
-        newTournament.date,
-      ]
-    );
-
-    res.status(201).json({ message: 'Tournament added successfully'}); // Return the newly created tournament ID
-  } catch (error) {
-    console.error('Error adding tournament:', error); // Log the error for debugging
-    res.status(500).json({ message: 'Error adding tournament', error: error.message });
-  }
-};
+  
 
 export const getAllTournaments = async (req: Request, res: Response) => {
     try {

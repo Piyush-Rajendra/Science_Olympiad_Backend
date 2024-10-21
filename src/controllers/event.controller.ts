@@ -58,20 +58,20 @@ export const addEvent = async (req: Request, res: Response) => {
   
 
     try {
-      const [result] = await pool.execute(
-        `UPDATE Event 
-         SET name = ?, tournament_id = ?, scoringAlg = ?, description = ?, status = ?, scoreStatus = ?
-         WHERE event_id = ?`,
-        [
-          name,
-          tournament_id, // Required
-          scoringAlg, // This can be null if not provided
-          description, // This can be null if not provided
-          event_id, // Use the event ID from the URL
-          status,
-          scoreStatus,
-        ]
-      );
+        const [result] = await pool.execute(
+            `UPDATE Event 
+             SET name = ?, tournament_id = ?, scoringAlg = ?, description = ?, status = ?, scoreStatus = ?
+             WHERE event_id = ?`,
+            [
+              name,
+              tournament_id, // Required
+              scoringAlg, // This can be null if not provided
+              description, // This can be null if not provided
+              status,
+              scoreStatus, // The scoreStatus field
+              event_id // This should come last in the array
+            ]
+          );
   
       // Check if any rows were affected
       const affectedRows = (result as { affectedRows: number }).affectedRows;
