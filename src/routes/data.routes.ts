@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { addTournament, getAllTournaments, editTournament, deleteTournament, getTourneyById, getCurrentTournamentIds, getCurrentTournamentsByGroupId } from '../controllers/tournament.controller';
+import { addTournament, getAllTournaments, editTournament, deleteTournament, getTourneyById, getCurrentTournamentIds, getCurrentTournamentsByGroupId, exportTournamentScoresToExcel } from '../controllers/tournament.controller';
 import { updateEventStatus, getEventStatus, getEventSupervisorEventById, updateEventForEventSupervisor, removeEventFromEventSupervisor, addEvent, deleteEvent, editEvent, getAllEvents, getEventById, getEventsByEventSupervisorId, getEventsByTournamentId, addEventToEventSupervisor, getEventsByEventSupervisor, getEventsBySupervisorAndTournamentId, getTotalAbsentByEvent, getEventStatusByEventId, getScorePercentageByEventId, finalizeEventByEventId, getEventsByTournamentAndSupervisor, checkAndUpdateEventStatus } from '../controllers/event.controller';
 import { addSchool, deleteSchool, editSchool, getAllSchools, getSchoolById } from '../controllers/school.controller';
 import { addTeam, deleteTeam, editTeam, getAllTeams, getTeamById, getTeamsBySchoolId } from '../controllers/team.controllers';
@@ -100,6 +100,10 @@ router.post('/add-schoolgroup', addSchoolGroup);
 router.put('/edit-schoolgroup/:id', editSchoolGroup);
 router.delete('/delete-schoolgroup/:id', deleteSchoolGroup);
 router.get('/get-schoolgroups-all', getAllSchoolGroups);
+
+//Excel
+//router.get('/export-tournaments', exportTournamentsToExcel);
+router.get('/export-scores/:tournamentId', exportTournamentScoresToExcel);
 
 
 export default router;
