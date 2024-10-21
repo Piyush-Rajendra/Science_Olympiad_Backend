@@ -353,7 +353,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
 
     const token = jwt.sign({ id: admin.admin_id }, secretKey, { expiresIn: '1h' });
 
-    res.status(200).json({ message: 'Login successful', token });
+    res.status(200).json({ message: 'Login successful', token, school_group_id: admin.school_group_id});
   } catch (error) {
     res.status(500).json({ message: 'Error logging in', error });
   }
@@ -606,8 +606,6 @@ export const changePasswordEventSupervisor = async (req: Request, res: Response)
   }
 };
 
-
-
 export const loginEventSupervisor = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
@@ -616,6 +614,7 @@ export const loginEventSupervisor = async (req: Request, res: Response) => {
   }
 
   try {
+    // Modified query to also select school_group_id
     const [rows]: any = await pool.execute('SELECT * FROM eventsupervisor WHERE email = ?', [email]);
 
     if (rows.length === 0) {
@@ -624,15 +623,23 @@ export const loginEventSupervisor = async (req: Request, res: Response) => {
 
     const eventSupervisor: IEventSupervisor = rows[0];
 
+    // Compare the provided password with the stored hashed password
     const isMatch = await bcrypt.compare(password, eventSupervisor.password);
 
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
+    // Create a JWT token
     const token = jwt.sign({ id: eventSupervisor.eventSupervisor_id }, secretKey, { expiresIn: '1h' });
 
-    res.status(200).json({ message: 'Login successful', token });
+    // Respond with the token and school_group_id
+    res.status(200).json({
+      message: 'Login successful',
+      token,
+      school_group_id: eventSupervisor.school_group_id, // Include school_group_id in the response
+      eventSupervisor_id: eventSupervisor.eventSupervisor_id
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error logging in', error });
   }
