@@ -234,3 +234,89 @@ export const getAnswersBySchoolGroupId = async (req: Request, res: Response) => 
       res.status(500).json({ message: 'Error retrieving answers', error: error.message });
   }
 };
+
+// Edit a question
+export const editQuestion = async (req: Request, res: Response) => {
+    const QandA_id = parseInt(req.params.QandA_id);
+    const { Question } = req.body;
+  
+    // Validate input
+    if (!QandA_id || !Question) {
+        return res.status(400).json({ message: 'QandA_id and Question are required' });
+    }
+  
+    try {
+        const lastUpdated = new Date();
+  
+        const [update]: any = await pool.execute(
+            'UPDATE QandA SET Question = ?, lastUpdated = ? WHERE QandA_id = ?',
+            [Question, lastUpdated, QandA_id]
+        );
+  
+        if (update.affectedRows === 0) {
+            return res.status(404).json({ message: 'Question not found' });
+        }
+  
+        res.status(200).json({ message: 'Question updated successfully' });
+    } catch (error) {
+        console.error('Error editing question:', error);
+        res.status(500).json({ message: 'Error editing question', error: error.message });
+    }
+};
+
+  // Edit an answer
+export const editAnswer = async (req: Request, res: Response) => {
+    const QandA_id = parseInt(req.params.QandA_id);
+    const { Answer } = req.body;
+  
+    // Validate input
+    if (!QandA_id || !Answer) {
+        return res.status(400).json({ message: 'QandA_id and Answer are required' });
+    }
+  
+    try {
+        const lastUpdated = new Date();
+  
+        const [update]: any = await pool.execute(
+            'UPDATE QandA SET Answer = ?, lastUpdated = ? WHERE QandA_id = ?',
+            [Answer, lastUpdated, QandA_id]
+        );
+  
+        if (update.affectedRows === 0) {
+            return res.status(404).json({ message: 'Answer not found' });
+        }
+  
+        res.status(200).json({ message: 'Answer updated successfully' });
+    } catch (error) {
+        console.error('Error editing answer:', error);
+        res.status(500).json({ message: 'Error editing answer', error: error.message });
+    }
+};
+  
+// Get an answer by QandA_id
+export const getAnswerByQandAId = async (req: Request, res: Response) => {
+    const QandA_id = parseInt(req.params.QandA_id);
+
+    // Validate input
+    if (isNaN(QandA_id)) {
+        return res.status(400).json({ message: 'Invalid QandA_id' });
+    }
+
+    try {
+        const [result]: any = await pool.execute(
+            'SELECT Answer FROM QandA WHERE QandA_id = ?',
+            [QandA_id]
+        );
+
+        if (result.length === 0) {
+            return res.status(404).json({ message: 'No answer found for the given QandA_id' });
+        }
+
+        res.status(200).json(result[0]); // Return the answer found
+    } catch (error) {
+        console.error('Error retrieving answer:', error);
+        res.status(500).json({ message: 'Error retrieving answer', error: error.message });
+    }
+};
+
+
