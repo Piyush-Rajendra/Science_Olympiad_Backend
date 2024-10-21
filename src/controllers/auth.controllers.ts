@@ -221,6 +221,81 @@ export const registerAdmin = async (req: Request, res: Response) => {
   }
 };
 
+export const forgotPassword = async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    // Correct way to extract rows
+    const [rows] = await pool.execute('SELECT * FROM admin WHERE email = ?', [email]);
+
+    const user = rows[0]; // Get the first matching user
+
+    if (!user) {
+      return res.status(404).json({ message: 'No user found with this email' });
+    }
+
+    // Generate token for password reset
+    const token = jwt.sign({ email: user.email }, secretKey, { expiresIn: '1h' });
+
+    // Create reset password URL
+    const resetUrl = `http://localhost:3001/change-new-password?token=${token}`;
+
+    // Send reset password email
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: 'ecinemabooking387@gmail.com',
+        pass: "injgdluouhraowjt" // Use environment variable for security
+      },
+    });
+
+    const mailOptions = {
+      from: '"EPOCH SCORING SYSTEM" <ecinemabooking387@gmail.com>',
+      to: user.email,
+      subject: 'Reset Your Password',
+      text: `Dear ${user.firstname},\n\nPlease use the following link to reset your password: ${resetUrl}\n\nThis link is valid for 1 hour.\n\nThank you!`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: 'Password reset email sent successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error sending password reset email', error });
+  }
+};
+
+export const changePasswordForgot = async (req: Request, res: Response) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ message: 'Token and new password are required' });
+  }
+
+  try {
+    // Verify the token
+    const decoded = jwt.verify(token, secretKey) as { email: string };
+
+    // Check if the token is valid
+    if (!decoded || !decoded.email) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the password in the database
+    await pool.execute('UPDATE admin SET password = ? WHERE email = ?', [hashedPassword, decoded.email]);
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating password', error });
+  }
+};
+
 
 export const changePasswordAdmin = async (req: Request, res: Response) => {
   const { email, oldPassword, newPassword } = req.body;
@@ -421,6 +496,84 @@ export const registerEventSupervisor = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error registering event supervisor', error });
   }
 };
+
+
+export const forgotPasswordES = async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    // Correct way to extract rows
+    const [rows] = await pool.execute('SELECT * FROM eventsupervisor WHERE email = ?', [email]);
+
+    const user = rows[0]; // Get the first matching user
+
+    if (!user) {
+      return res.status(404).json({ message: 'No user found with this email' });
+    }
+
+    // Generate token for password reset
+    const token = jwt.sign({ email: user.email }, secretKey, { expiresIn: '1h' });
+
+    // Create reset password URL
+    const resetUrl = `http://localhost:3001/change-new-password?token=${token}`;
+
+    // Send reset password email
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: 'ecinemabooking387@gmail.com',
+        pass: "injgdluouhraowjt" // Use environment variable for security
+      },
+    });
+
+    const mailOptions = {
+      from: '"EPOCH SCORING SYSTEM" <ecinemabooking387@gmail.com>',
+      to: user.email,
+      subject: 'Reset Your Password',
+      text: `Dear ${user.firstName},\n\nPlease use the following link to reset your password: ${resetUrl}\n\nThis link is valid for 1 hour.\n\nThank you!`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: 'Password reset email sent successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error sending password reset email', error });
+  }
+};
+
+export const changePasswordForgotES = async (req: Request, res: Response) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ message: 'Token and new password are required' });
+  }
+
+  try {
+    // Verify the token
+    const decoded = jwt.verify(token, secretKey) as { email: string };
+
+    // Check if the token is valid
+    if (!decoded || !decoded.email) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the password in the database
+    await pool.execute('UPDATE eventsupervisor SET password = ? WHERE email = ?', [hashedPassword, decoded.email]);
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating password', error });
+  }
+};
+
+
 
 export const changePasswordEventSupervisor = async (req: Request, res: Response) => {
   const { email, oldPassword, newPassword } = req.body;
@@ -695,56 +848,6 @@ export const changePassword = async (req: Request, res: Response) => {
   }
 };
 
-export const forgotPassword = async (req: Request, res: Response) => {
-  const { email } = req.body;
-
-  // Check if email is provided
-  if (!email) {
-    return res.status(400).json({ message: 'Email is required' });
-  }
-
-  try {
-    // Fetch the user from the database using email
-    const [rows]: any = await pool.execute('SELECT * FROM users WHERE email = ?', [email]);
-
-    if (rows.length === 0) {
-      return res.status(404).json({ message: 'No user found with this email' });
-    }
-
-    const user = rows[0];
-
-    // Generate a token (JWT) with a short expiration time (e.g., 1 hour)
-    const token = jwt.sign({ id: user.user_id, email: user.email }, secretKey, { expiresIn: '1h' });
-
-    // Create the password reset link
-    const resetLink = `http://localhost:3000/reset-password?token=${token}`;
-
-    // Send email with the reset link
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail',
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: 'ecinemabooking387@gmail.com',
-        pass: "injgdluouhraowjt",
-      },
-    });
-
-    const mailOptions = {
-      from: '"EPOCH SCORING SYSTEM" <ecinemabooking387@gmail.com>',
-      to: email,
-      subject: 'Password Reset Request',
-      text: `Hi ${user.name},\n\nYou requested a password reset. Click the link below to reset your password:\n\n${resetLink}\n\nThis link will expire in 1 hour.\n\nIf you did not request this, please ignore this email.`,
-    };
-
-    await transporter.sendMail(mailOptions);
-
-    res.status(200).json({ message: 'Password reset email sent successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error sending password reset email', error });
-  }
-};
 
 export const resetPassword = async (req: Request, res: Response) => {
   const { token, newPassword } = req.body;
