@@ -333,7 +333,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: 'Username and password are required' });
+    return res.status(400).json({ message: 'Email and password are required' });
   }
 
   try {
@@ -610,7 +610,7 @@ export const loginEventSupervisor = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: 'email and password are required' });
+    return res.status(400).json({ message: 'Email and password are required' });
   }
 
   try {
