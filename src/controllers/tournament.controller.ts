@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import pool from '../../config/db.config';
 import { ITournament } from '../models/data.models'; // Adjust the import path
+import xlsx from 'xlsx';
+import { Workbook } from 'exceljs'; // Import Workbook from exceljs
+import ExcelJS from 'exceljs';
 
 export const addTournament = async (req: Request, res: Response) => {
   const { name, division, group_id, isCurrent, NumOfTimeBlocks, location, description, date } = req.body;
@@ -173,4 +176,150 @@ export const getCurrentTournamentIds = async (req: Request, res: Response) => {
       res.status(500).json({ message: 'Error fetching current tournaments for group', error: error.message });
     }
   };
+
+
+  
+  interface RankedTeam {
+    teamName: string;
+    score: number | null;
+    tier: number;
+    TeamTimeBlock_ID: number;
+    unique_id: number; // Added to store the unique team ID
+    rank?: number; // Optional property for rank
+}
+
+export const exportTournamentScoresToExcel = async (req: Request, res: Response) => {
+    const tournamentId = parseInt(req.params.tournamentId);
+
+    if (!tournamentId) {
+        return res.status(400).json({ error: 'Tournament ID is required' });
+    }
+
+    try {
+        const [events] = await pool.execute(
+            'SELECT * FROM Event WHERE tournament_id = ?',
+            [tournamentId]
+        ) as [any[], any];
+
+        const workbook = new ExcelJS.Workbook();
+        const eventRanks: { [eventId: number]: { [teamTimeBlockId: number]: number | null } } = {};
+        const allTeamTimeBlocks: RankedTeam[] = [];
+        const overallRanks: { [teamTimeBlockId: number]: number } = {}; // To hold overall ranks
+
+        for (const event of events) {
+            const { event_id, name, scoringAlg } = event;
+
+            const [teamTimeBlocks] = await pool.execute(
+                `
+                SELECT t.unique_id AS unique_id, t.name AS teamName, tt.TeamTimeBlock_ID, tt.Score, tt.Tier
+                FROM TeamTimeBlock tt
+                JOIN Team t ON tt.Team_ID = t.team_id
+                WHERE tt.Event_ID = ?
+                ORDER BY tt.Tier, tt.Score`,
+                [event_id]
+            ) as [any[], any];
+
+            const rankedTeams: RankedTeam[] = teamTimeBlocks
+                .map((tt) => ({
+                    teamName: tt.teamName,
+                    score: tt.Score,
+                    tier: tt.Tier,
+                    TeamTimeBlock_ID: tt.TeamTimeBlock_ID,
+                    unique_id: tt.unique_id, // Capture unique ID
+                }))
+                .filter((tt) => tt.score !== null); // Filter out null scores for ranking
+
+            // Rank the teams based on scoring algorithm
+            rankedTeams.sort((a, b) => {
+                if (a.tier !== b.tier) {
+                    return a.tier - b.tier;
+                }
+                if (scoringAlg === 'Default') {
+                    return b.score! - a.score!;
+                } else if (scoringAlg === 'Flipped') {
+                    return a.score! - b.score!;
+                }
+                return 0;
+            });
+
+            let currentRank = 1;
+            for (const team of rankedTeams) {
+                team.rank = currentRank; // Assign rank
+                eventRanks[event_id] = eventRanks[event_id] || {};
+                eventRanks[event_id][team.TeamTimeBlock_ID] = team.rank; // Store the rank
+                currentRank++;
+            }
+
+            // Add a new sheet for the event
+            const eventSheet = workbook.addWorksheet(name);
+            eventSheet.addRow(['Team Name', 'Score', 'Tier', 'Rank']);
+
+            for (const team of rankedTeams) {
+                eventSheet.addRow([team.teamName, team.score, team.tier, team.rank ?? 'N/A']);
+            }
+
+            // Collect all TeamTimeBlock_IDs for the main sheet
+            allTeamTimeBlocks.push(...rankedTeams);
+        }
+
+        const mainSheet = workbook.addWorksheet('Main');
+        const mainHeaders = ['Unique ID', 'Team Name', ...events.map(event => event.name), 'Total Rank', 'Overall Rank'];
+        mainSheet.addRow(mainHeaders);
+
+        const totalRanks: { [teamTimeBlockId: number]: number } = {};
+
+        for (const tt of allTeamTimeBlocks) {
+            const { unique_id, teamName } = tt; // Use unique_id
+            const row = [unique_id, teamName]; // Update to use unique_id
+
+            let totalRank = 0;
+
+            for (const event of events) {
+                const rank = eventRanks[event.event_id]?.[tt.TeamTimeBlock_ID] ?? (allTeamTimeBlocks.length + 1); // Default to last place
+                row.push(rank);
+                totalRank += rank; // Accumulate total rank
+            }
+
+            totalRanks[tt.TeamTimeBlock_ID] = totalRank;
+            row.push(totalRank); // Total rank
+            mainSheet.addRow(row);
+        }
+
+        // Calculate overall ranks based on total ranks
+        const totalRankEntries = Object.entries(totalRanks).map(([id, total]) => ({ TeamTimeBlock_ID: id, total }));
+        totalRankEntries.sort((a, b) => a.total - b.total);
+
+        let overallRank = 1;
+        for (const entry of totalRankEntries) {
+            overallRanks[entry.TeamTimeBlock_ID] = overallRank;
+            overallRank++;
+        }
+
+        // Update the main sheet with overall ranks
+        mainSheet.getColumn(mainHeaders.length).eachCell((cell, index) => {
+            if (index > 1) { // Skip the header row
+                const TeamTimeBlock_ID = allTeamTimeBlocks[index - 2].TeamTimeBlock_ID; // Adjust index
+                cell.value = overallRanks[TeamTimeBlock_ID] ?? 'N/A'; // Use 'N/A' for teams without a rank
+            }
+        });
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename=tournament_scores.xlsx');
+
+        await workbook.xlsx.write(res);
+        res.end();
+    } catch (error) {
+        console.error('Error exporting tournament scores:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+
+
+
+
+
+  
+
+
 
