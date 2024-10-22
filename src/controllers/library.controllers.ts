@@ -319,4 +319,62 @@ export const getAnswerByQandAId = async (req: Request, res: Response) => {
     }
 };
 
+// Get all questions by schoolGroup_id
+export const getQuestionsBySchoolGroupId = async (req: Request, res: Response) => {
+    const schoolGroup_id = parseInt(req.params.schoolGroup_id);
+
+    // Validate input
+    if (isNaN(schoolGroup_id)) {
+        return res.status(400).json({ message: 'Invalid schoolGroup_id' });
+    }
+
+    try {
+        const [result]: [RowDataPacket[], any] = await pool.execute(
+            'SELECT * FROM QandA WHERE schoolGroup_id = ?',
+            [schoolGroup_id]
+        );
+
+        if (result.length === 0) {
+            return res.status(404).json({ message: 'No questions found for the given schoolGroup_id' });
+        }
+
+        res.status(200).json(result);
+    } catch (error) {
+        console.error('Error retrieving questions:', error);
+        res.status(500).json({ message: 'Error retrieving questions', error: error.message });
+    }
+};
+
+// Function to delete a PDF by schoolGroup_id
+export const deletePDF = async (req: Request, res: Response) => {
+    const schoolGroup_id = parseInt(req.params.schoolGroup_id);
+
+    // Validate input
+    if (isNaN(schoolGroup_id)) {
+        return res.status(400).json({ message: 'Invalid schoolGroup_id' });
+    }
+
+    try {
+        // Check if a PDF exists for the given schoolGroup_id
+        const [rows]: [RowDataPacket[], any] = await pool.execute(
+            'SELECT * FROM resourcelibrary WHERE schoolGroup_id = ?',
+            [schoolGroup_id]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'No PDF found for the given schoolGroup_id' });
+        }
+
+        // Delete the PDF entry from the database
+        const [result]: any = await pool.execute(
+            'DELETE FROM resourcelibrary WHERE schoolGroup_id = ?',
+            [schoolGroup_id]
+        );
+
+        res.status(200).json({ message: 'PDF deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting PDF:', error);
+        res.status(500).json({ message: 'Error deleting PDF', error: error.message });
+    }
+};
 
