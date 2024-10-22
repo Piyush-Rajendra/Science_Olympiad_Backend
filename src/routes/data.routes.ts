@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { addTournament, getAllTournaments, editTournament, deleteTournament, getTourneyById, getCurrentTournamentIds, getCurrentTournamentsByGroupId, exportTournamentScoresToExcel } from '../controllers/tournament.controller';
 import { updateEventStatus, getEventStatus, getEventSupervisorEventById, updateEventForEventSupervisor, removeEventFromEventSupervisor, addEvent, deleteEvent, editEvent, getAllEvents, getEventById, getEventsByEventSupervisorId, getEventsByTournamentId, addEventToEventSupervisor, getEventsByEventSupervisor, getEventsBySupervisorAndTournamentId, getTotalAbsentByEvent, getEventStatusByEventId, getScorePercentageByEventId, finalizeEventByEventId, getEventsByTournamentAndSupervisor, checkAndUpdateEventStatus, getEventSupervisorIdByEmail } from '../controllers/event.controller';
-import { addSchool, deleteSchool, editSchool, getAllSchools, getSchoolById } from '../controllers/school.controller';
-import { addTeam, deleteTeam, editTeam, getAllTeams, getTeamById, getTeamsBySchoolId } from '../controllers/team.controllers';
+import { addSchool, deleteSchool, editSchool, getAllSchools, getSchoolById, getSchoolsByTournamentId } from '../controllers/school.controller';
+import { addTeam, deleteTeam, editTeam, getAllTeams, getTeamById, getTeamsBySchoolId, getTeamsByTournamentId } from '../controllers/team.controllers';
 import { addScore, deleteScore, editScore, getScoreById, getScoresByEventId, getScoresBySchoolGroupId, getScoresBySchoolId, getScoresByTeamId, getScoresByTournamentId } from '../controllers/score.controllers';
 import { updateTimeBlockStatus, getTimeBlockStatus, addTimeblocks, editTimeblock, deleteTimeblock, getTimeblocksByEventId, getTimeblocksByTournamentId} from '../controllers/timeblock.controller'
 import { addSchoolGroup, deleteSchoolGroup, editSchoolGroup, getAllSchoolGroups } from '../controllers/schoolgroups.controllers'
@@ -48,6 +48,7 @@ router.put('/edit-school/:id', editSchool);
 router.get('/get-schools', getAllSchools);
 router.delete('/delete-school/:id', deleteSchool);
 router.get('/get-school/:id', getSchoolById);
+router.get('/get-schools-by-tournament/:tournamentId', getSchoolsByTournamentId);
 
 //Team
 router.post('/add-team', addTeam);
@@ -56,6 +57,7 @@ router.get('/get-teams', getAllTeams);
 router.delete('/delete-team/:id', deleteTeam);
 router.put('/edit-team/:id', editTeam);
 router.get('/get-teams-by-school/:schoolId', getTeamsBySchoolId);
+router.get('/get-teams-by-tournament/:tournamentId', getTeamsByTournamentId);
 
 //Score
 router.post('/add-score', addScore);

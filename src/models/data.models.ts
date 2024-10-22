@@ -78,6 +78,7 @@ export interface ISchool {
   school_group_id: number;
   name: String; 
   flight: String; 
+  tournament_id: number;
 }
 
 // models/team.model.ts
@@ -86,6 +87,7 @@ export interface ITeam {
   school_id: number;
   name: String; 
   unique_id: String; 
+  tournament_id: number;
 }
 
 // models/teamTimeBlock.model.ts
