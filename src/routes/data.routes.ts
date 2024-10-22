@@ -7,9 +7,14 @@ import { addScore, deleteScore, editScore, getScoreById, getScoresByEventId, get
 import { updateTimeBlockStatus, getTimeBlockStatus, addTimeblocks, editTimeblock, deleteTimeblock, getTimeblocksByEventId, getTimeblocksByTournamentId} from '../controllers/timeblock.controller'
 import { addSchoolGroup, deleteSchoolGroup, editSchoolGroup, getAllSchoolGroups } from '../controllers/schoolgroups.controllers'
 import { getTeamTimeBlockWithSchoolById,getUniqueIdByTeamTimeBlockId, updateAttendStatus, getAttendStatus, updateTeamTimeBlockComment, getTeamTimeBlockComment, addTeamTimeBlock, deleteTeamTimeBlock, editTeamTimeBlock, getTeamTimeBlockById, getTeamTimeBlocksByEventId, getTeamTimeBlocksByTeamId, getTeamTimeBlocksByTimeBlockId } from '../controllers/teamtimeblock.controller';
+import { getTournamentHistoryBySchoolGroup, addTournamentHistory, downloadTournamentHistory } from '../controllers/tournamentHistory.controllers';
+import multer from 'multer';
 
 
 const router = Router();
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 //Tournament
 router.post('/add-tournament', addTournament);
@@ -20,6 +25,10 @@ router.get('/get-tournament/:id', getTourneyById);
 router.get('/get-current-tournaments', getCurrentTournamentIds);
 router.get('/get-current-tournaments/:groupId', getCurrentTournamentsByGroupId)
 
+//Tournament History
+router.post('/tournaments/:tournamentId/add-history', addTournamentHistory);
+router.get('/get-tournament-history/:schoolgroupID', getTournamentHistoryBySchoolGroup);
+router.get('/tournament-history/:id/download', downloadTournamentHistory);
 
 //Event 
 router.post('/add-event', addEvent);

@@ -4,6 +4,7 @@ import { ITournament } from '../models/data.models'; // Adjust the import path
 import xlsx from 'xlsx';
 import { Workbook } from 'exceljs'; // Import Workbook from exceljs
 import ExcelJS from 'exceljs';
+import { RankedTeam } from '../models/data.models';
 
 export const addTournament = async (req: Request, res: Response) => {
     const { name, division, group_id, isCurrent, NumOfTimeBlocks, location, description, date } = req.body;
@@ -182,17 +183,6 @@ export const getCurrentTournamentIds = async (req: Request, res: Response) => {
     }
   };
 
-
-  
-  interface RankedTeam {
-    teamName: string;
-    score: number | null;
-    tier: number;
-    TeamTimeBlock_ID: number;
-    unique_id: number; // Added to store the unique team ID
-    rank?: number; // Optional property for rank
-}
-
 export const exportTournamentScoresToExcel = async (req: Request, res: Response) => {
     const tournamentId = parseInt(req.params.tournamentId);
 
@@ -318,13 +308,3 @@ export const exportTournamentScoresToExcel = async (req: Request, res: Response)
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
-
-
-
-
-
-
-  
-
-
-

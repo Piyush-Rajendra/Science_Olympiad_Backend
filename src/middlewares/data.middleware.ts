@@ -159,10 +159,10 @@ export const createDataTables = async () => {
     await pool.execute(`
         CREATE TABLE IF NOT EXISTS TournamentHistory (
             tournament_history_id INT AUTO_INCREMENT PRIMARY KEY,
-            tournament_id INT,
-            school_group_id INT,
-            excelmasterscore TEXT,
-            FOREIGN KEY (tournament_id) REFERENCES Tournament (tournament_id) ON DELETE CASCADE ON UPDATE CASCADE,
+            school_group_id INT NOT NULL,
+            excelmasterscore LONGBLOB, 
+            date DATETIME,
+            name VARCHAR(255),
             FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE
         )
     `);
