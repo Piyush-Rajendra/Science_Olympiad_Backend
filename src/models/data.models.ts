@@ -37,6 +37,7 @@ export interface ITournamentHistory {
   excelMasterScore: string;
   date: Date;
   name: string;
+  division: string;
 }
 
 // models/scores.model.ts

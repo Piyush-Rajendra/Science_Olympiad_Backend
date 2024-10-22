@@ -10,9 +10,10 @@ export const addTournamentHistory = async (req: Request, res: Response) => {
     const tournamentId = parseInt(req.params.tournamentId);
     const schoolGroupId = req.body.school_group_id; // Ensure this is passed in the request
     const tournamentName = req.body.name; // Ensure the tournament name is passed in the request
+    const division = req.body.division; // Ensure the division is passed in the request
 
-    if (!tournamentId || !schoolGroupId || !tournamentName) {
-        return res.status(400).json({ error: 'Tournament ID, School Group ID, and tournament name are required' });
+    if (!tournamentId || !schoolGroupId || !tournamentName || !division) {
+        return res.status(400).json({ error: 'Tournament ID, School Group ID, tournament name, and division are required' });
     }
 
     try {
@@ -117,8 +118,8 @@ export const addTournamentHistory = async (req: Request, res: Response) => {
 
         // Store the Excel buffer in the database
         const [result] = await pool.execute(`
-            INSERT INTO TournamentHistory (school_group_id, excelmasterscore, date, name)
-            VALUES (?, ?, NOW(), ?)`, [schoolGroupId, buffer, tournamentName]);
+            INSERT INTO TournamentHistory (school_group_id, excelmasterscore, date, name, division)
+            VALUES (?, ?, NOW(), ?, ?)`, [schoolGroupId, buffer, tournamentName, division]);
 
         const insertResult = result as ResultSetHeader;
 
