@@ -19,7 +19,7 @@ export const addTeamTimeBlock = async (req: Request, res: Response) => {
         attend,
         comment: comment || '', // Default to empty string if comment is not provided
         tier: tier || 0, // Default tier to 0 if not provided
-        score: score || 0.0, // Default score to 0 if not provided
+        score: score || null, // Default score to 0 if not provided
     };
 
     try {
