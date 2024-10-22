@@ -163,6 +163,7 @@ export const createDataTables = async () => {
             excelmasterscore LONGBLOB, 
             date DATETIME,
             name VARCHAR(255),
+            division VARCHAR(255),
             FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE
         )
     `);
