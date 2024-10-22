@@ -195,6 +195,7 @@ export const getCurrentTournamentIds = async (req: Request, res: Response) => {
     rank?: number; // Optional property for rank
     flightRankA: number;
     flightRankB: number; 
+    comment: String;
 }
 
 
@@ -287,7 +288,7 @@ export const exportTournamentScoresToExcel = async (req: Request, res: Response)
 
             const [teamTimeBlocks] = await pool.execute(
                 `
-                SELECT t.team_id AS unique_id, t.unique_id AS teamIden, t.name AS teamName, tt.TeamTimeBlock_ID, tt.Score, tt.Tier, s.flight
+                SELECT t.team_id AS unique_id, tt.Comment AS comment, t.unique_id AS teamIden, t.name AS teamName, tt.TeamTimeBlock_ID, tt.Score, tt.Tier, s.flight
                 FROM TeamTimeBlock tt
                 JOIN Team t ON tt.Team_ID = t.team_id
                 JOIN School s ON t.school_id = s.id
@@ -310,6 +311,7 @@ export const exportTournamentScoresToExcel = async (req: Request, res: Response)
                     unique_id: tt.unique_id, // Add unique_id for Team Identifier
                     flight: tt.flight,
                     teamIden: tt.teamIden,
+                    comment: tt.comment,
                     flightRankA: null, // Initialize flight rank A
                     flightRankB: null, // Initialize flight rank B
                 }))
@@ -340,7 +342,7 @@ export const exportTournamentScoresToExcel = async (req: Request, res: Response)
 
             // Create a new worksheet/tab for the current event
             const eventSheet = workbook.addWorksheet(name);
-            const eventHeaders = ['Unique ID', 'Team Identifier', 'Team Name', 'Score', 'Tier', 'Flight', 'Rank in Event', 'Flight Rank A', 'Flight Rank B'];
+            const eventHeaders = ['Unique ID', 'Team Identifier', 'Team Name', 'Score', 'Tier', 'Flight', 'Rank', 'Flight A Rank', 'Flight B Rank', 'Comment'];
             eventSheet.addRow(eventHeaders);
 
             // Populate the event sheet with ranked teams, including flight ranks
@@ -354,7 +356,8 @@ export const exportTournamentScoresToExcel = async (req: Request, res: Response)
                     team.flight,
                     team.rank,         // Rank in event
                     team.flightRankA,   // Rank within Flight A
-                    team.flightRankB    // Rank within Flight B
+                    team.flightRankB,    // Rank within Flight B
+                    team.comment
                 ]);
             });
         }
@@ -394,11 +397,11 @@ export const exportTournamentScoresToExcel = async (req: Request, res: Response)
         // Now calculate overall ranks based on total ranks (ignoring flight)
         const totalRankEntries: { [teamId: number]: number } = {}; // Holds total rank per team
 
-Object.entries(teamEventRanks).forEach(([teamId, eventRanks]) => {
-    const totalRank = Object.values(eventRanks).reduce((sum, rank) => sum + rank, 0) +
-                      (events.length - Object.keys(eventRanks).length) * defaultRank; // Calculate total rank
-    totalRankEntries[parseInt(teamId)] = totalRank; // Store total rank for each team
-});
+        Object.entries(teamEventRanks).forEach(([teamId, eventRanks]) => {
+            const totalRank = Object.values(eventRanks).reduce((sum, rank) => sum + rank, 0) +
+                            (events.length - Object.keys(eventRanks).length) * defaultRank; // Calculate total rank
+            totalRankEntries[parseInt(teamId)] = totalRank; // Store total rank for each team
+        });
 
         // Sort teams by total rank
         const sortedTotalRanks = Object.entries(totalRankEntries)
