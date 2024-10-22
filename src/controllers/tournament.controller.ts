@@ -166,6 +166,8 @@ export const getCurrentTournamentIds = async (req: Request, res: Response) => {
     }
   };
 
+  
+
   export const getCurrentTournamentsByGroupId = async (req: Request, res: Response) => {
     const groupId = req.params.groupId; // Extract group_id from the URL
   
@@ -199,33 +201,16 @@ export const exportTournamentScoresToExcel = async (req: Request, res: Response)
         const workbook = new ExcelJS.Workbook();
         const eventRanks: { [eventId: number]: { [teamTimeBlockId: number]: number | null } } = {};
         const allTeamTimeBlocks: RankedTeam[] = [];
-        const overallRanks: { [teamTimeBlockId: number]: number } = {}; // To hold overall ranks
+        const totalRanks: { [teamTimeBlockId: number]: number } = {}; // Holds total rank per team
+        const overallRanks: { [teamTimeBlockId: number]: number } = {}; // Holds overall rank after sorting
+        const teamEventRanks: { [teamId: number]: { [eventId: number]: number } } = {}; // To store event ranks by team
 
-        for (const event of events) {
-            const { event_id, name, scoringAlg } = event;
+        // Create a map to hold team names
+        const teamNamesMap: { [teamId: number]: string } = {};
 
-            const [teamTimeBlocks] = await pool.execute(
-                `
-                SELECT t.unique_id AS unique_id, t.name AS teamName, tt.TeamTimeBlock_ID, tt.Score, tt.Tier
-                FROM TeamTimeBlock tt
-                JOIN Team t ON tt.Team_ID = t.team_id
-                WHERE tt.Event_ID = ?
-                ORDER BY tt.Tier, tt.Score`,
-                [event_id]
-            ) as [any[], any];
-
-            const rankedTeams: RankedTeam[] = teamTimeBlocks
-                .map((tt) => ({
-                    teamName: tt.teamName,
-                    score: tt.Score,
-                    tier: tt.Tier,
-                    TeamTimeBlock_ID: tt.TeamTimeBlock_ID,
-                    unique_id: tt.unique_id, // Capture unique ID
-                }))
-                .filter((tt) => tt.score !== null); // Filter out null scores for ranking
-
-            // Rank the teams based on scoring algorithm
-            rankedTeams.sort((a, b) => {
+        // Function to rank teams by score within an event (irrespective of flight)
+        const rankTeams = (teams: RankedTeam[], scoringAlg: string) => {
+            teams.sort((a, b) => {
                 if (a.tier !== b.tier) {
                     return a.tier - b.tier;
                 }
@@ -238,73 +223,200 @@ export const exportTournamentScoresToExcel = async (req: Request, res: Response)
             });
 
             let currentRank = 1;
-            for (const team of rankedTeams) {
-                team.rank = currentRank; // Assign rank
-                eventRanks[event_id] = eventRanks[event_id] || {};
-                eventRanks[event_id][team.TeamTimeBlock_ID] = team.rank; // Store the rank
+            for (const team of teams) {
+                team.rank = currentRank; // Assign rank within event
                 currentRank++;
             }
+        };
 
-            // Add a new sheet for the event
-            const eventSheet = workbook.addWorksheet(name);
-            eventSheet.addRow(['Team Name', 'Score', 'Tier', 'Rank']);
+        // Function to rank teams within their flight
+        const rankTeamsByFlight = (teams: RankedTeam[], scoringAlg: string) => {
+            const flights: { [flight: string]: RankedTeam[] } = {};
 
-            for (const team of rankedTeams) {
-                eventSheet.addRow([team.teamName, team.score, team.tier, team.rank ?? 'N/A']);
+            // Group teams by flight
+            teams.forEach((team) => {
+                if (!flights[team.flight]) {
+                    flights[team.flight] = [];
+                }
+                flights[team.flight].push(team);
+            });
+
+            // Rank teams within each flight
+            for (const flight in flights) {
+                const flightTeams = flights[flight];
+                flightTeams.sort((a, b) => {
+                    if (a.tier !== b.tier) {
+                        return a.tier - b.tier;
+                    }
+                    if (scoringAlg === 'Default') {
+                        return b.score! - a.score!;
+                    } else if (scoringAlg === 'Flipped') {
+                        return a.score! - b.score!;
+                    }
+                    return 0;
+                });
+
+                let flightRank = 1;
+                for (const team of flightTeams) {
+                    if (team.flight === 'A') {
+                        team.flightRankA = flightRank; // Assign rank within flight A
+                    } else if (team.flight === 'B') {
+                        team.flightRankB = flightRank; // Assign rank within flight B
+                    }
+                    flightRank++;
+                }
             }
+        };
 
-            // Collect all TeamTimeBlock_IDs for the main sheet
+        // Process each event and rank teams
+        for (const event of events) {
+            const { event_id, name, scoringAlg } = event;
+
+            const [teamTimeBlocks] = await pool.execute(
+                `
+                SELECT t.team_id AS unique_id, tt.Comment AS comment, t.unique_id AS teamIden, t.name AS teamName, tt.TeamTimeBlock_ID, tt.Score, tt.Tier, s.flight
+                FROM TeamTimeBlock tt
+                JOIN Team t ON tt.Team_ID = t.team_id
+                JOIN School s ON t.school_id = s.id
+                WHERE tt.Event_ID = ?
+                ORDER BY tt.Tier, tt.Score`,
+                [event_id]
+            ) as [any[], any];
+
+            // Populate team names into the map
+            teamTimeBlocks.forEach((tt) => {
+                teamNamesMap[tt.unique_id] = tt.teamName; // Store team names
+            });
+
+            const rankedTeams: RankedTeam[] = teamTimeBlocks
+                .map((tt) => ({
+                    teamName: tt.teamName,
+                    score: tt.Score,
+                    tier: tt.Tier,
+                    TeamTimeBlock_ID: tt.TeamTimeBlock_ID,
+                    unique_id: tt.unique_id, // Add unique_id for Team Identifier
+                    flight: tt.flight,
+                    teamIden: tt.teamIden,
+                    comment: tt.comment,
+                    flightRankA: null, // Initialize flight rank A
+                    flightRankB: null, // Initialize flight rank B
+                }))
+                .filter((tt) => tt.score !== null); // Only rank non-null scores
+
+            // Rank all teams in the event (irrespective of flight)
+            rankTeams(rankedTeams, scoringAlg);
+
+            // Rank teams within their specific flights
+            rankTeamsByFlight(rankedTeams, scoringAlg);
+
+            // Populate team rankings in the map
+            rankedTeams.forEach((team) => {
+                if (!teamEventRanks[team.unique_id]) {
+                    teamEventRanks[team.unique_id] = {};
+                }
+                teamEventRanks[team.unique_id][event_id] = team.rank; // Save event rank for the team
+            });
+
+            // Store event ranks for overall ranking
+            eventRanks[event_id] = eventRanks[event_id] || {};
+            rankedTeams.forEach((team) => {
+                eventRanks[event_id][team.TeamTimeBlock_ID] = team.rank; // Save event rank
+            });
+
+            // Add the teams to the list for overall ranking (only once, not by flight)
             allTeamTimeBlocks.push(...rankedTeams);
+
+            // Create a new worksheet/tab for the current event
+            const eventSheet = workbook.addWorksheet(name);
+            const eventHeaders = ['Unique ID', 'Team Identifier', 'Team Name', 'Score', 'Tier', 'Flight', 'Rank', 'Flight A Rank', 'Flight B Rank', 'Comment'];
+            eventSheet.addRow(eventHeaders);
+
+            // Populate the event sheet with ranked teams, including flight ranks
+            rankedTeams.forEach((team) => {
+                eventSheet.addRow([
+                    team.unique_id,
+                    team.teamIden, // Team Identifier
+                    team.teamName,
+                    team.score,
+                    team.tier,
+                    team.flight,
+                    team.rank,         // Rank in event
+                    team.flightRankA,   // Rank within Flight A
+                    team.flightRankB,    // Rank within Flight B
+                    team.comment
+                ]);
+            });
         }
 
+        // Main sheet to aggregate all teams and their overall rank
         const mainSheet = workbook.addWorksheet('Main');
-        const mainHeaders = ['Unique ID', 'Team Name', ...events.map(event => event.name), 'Total Rank', 'Overall Rank'];
+        const mainHeaders = ['Unique ID', 'Team Identifier', 'Team Name', ...events.map(event => event.name), 'Total Rank', 'Overall Rank'];
         mainSheet.addRow(mainHeaders);
 
-        const totalRanks: { [teamTimeBlockId: number]: number } = {};
-
-        for (const tt of allTeamTimeBlocks) {
-            const { unique_id, teamName } = tt; // Use unique_id
-            const row = [unique_id, teamName]; // Update to use unique_id
-
-            let totalRank = 0;
-
-            for (const event of events) {
-                const rank = eventRanks[event.event_id]?.[tt.TeamTimeBlock_ID] ?? (allTeamTimeBlocks.length + 1); // Default to last place
-                row.push(rank);
-                totalRank += rank; // Accumulate total rank
-            }
-
-            totalRanks[tt.TeamTimeBlock_ID] = totalRank;
-            row.push(totalRank); // Total rank
+        // Calculate the total rank for each team (sum of ranks across all events)
+        const teamEntries = Object.entries(teamEventRanks).map(([teamId, eventRanks]) => {
+            return {
+                unique_id: parseInt(teamId),
+                teamName: teamNamesMap[parseInt(teamId)] || 'Unknown', // Use the map to get team name
+                eventRanks,
+            };
+        });
+        
+        // Default rank for non-participating events (greater than max possible rank)
+        const defaultRank = allTeamTimeBlocks.length + 1; // Assuming this is higher than any possible rank
+        
+        teamEntries.forEach((team) => {
+            const row = [team.unique_id, team.unique_id, team.teamName]; // Unique ID and Team Identifier
+        
+            events.forEach((event) => {
+                const eventRank = team.eventRanks[event.event_id] || defaultRank; // Use default rank if missing
+                row.push(eventRank);
+            });
+        
+            // Calculate total rank (sum of ranks across all events)
+            const totalRank = Object.values(team.eventRanks).reduce((sum, rank) => sum + rank, 0) +
+                              (events.length - Object.keys(team.eventRanks).length) * defaultRank; // Add default ranks for missing events
+            row.push(totalRank); // Add total rank to the row in the main sheet
             mainSheet.addRow(row);
-        }
+        });
 
-        // Calculate overall ranks based on total ranks
-        const totalRankEntries = Object.entries(totalRanks).map(([id, total]) => ({ TeamTimeBlock_ID: id, total }));
-        totalRankEntries.sort((a, b) => a.total - b.total);
+        // Now calculate overall ranks based on total ranks (ignoring flight)
+        const totalRankEntries: { [teamId: number]: number } = {}; // Holds total rank per team
 
+        Object.entries(teamEventRanks).forEach(([teamId, eventRanks]) => {
+            const totalRank = Object.values(eventRanks).reduce((sum, rank) => sum + rank, 0) +
+                            (events.length - Object.keys(eventRanks).length) * defaultRank; // Calculate total rank
+            totalRankEntries[parseInt(teamId)] = totalRank; // Store total rank for each team
+        });
+
+        // Sort teams by total rank
+        const sortedTotalRanks = Object.entries(totalRankEntries)
+            .sort(([, totalRankA], [, totalRankB]) => totalRankA - totalRankB); // Sort by total rank
+
+        // Assign overall ranks based on sorted order
         let overallRank = 1;
-        for (const entry of totalRankEntries) {
-            overallRanks[entry.TeamTimeBlock_ID] = overallRank;
+        const overallRanker: { [teamId: number]: number } = {}; // Resetting overall ranks
+        for (const [teamId] of sortedTotalRanks) {
+            overallRanker[parseInt(teamId)] = overallRank; // Assign overall rank
             overallRank++;
         }
 
-        // Update the main sheet with overall ranks
-        mainSheet.getColumn(mainHeaders.length).eachCell((cell, index) => {
-            if (index > 1) { // Skip the header row
-                const TeamTimeBlock_ID = allTeamTimeBlocks[index - 2].TeamTimeBlock_ID; // Adjust index
-                cell.value = overallRanks[TeamTimeBlock_ID] ?? 'N/A'; // Use 'N/A' for teams without a rank
+        // Update main sheet to reflect the correct overall ranks
+        mainSheet.eachRow((row, rowNumber) => {
+            if (rowNumber > 1) { // Skip the header row
+                const teamId = row.getCell(1).value as number;
+                const overallRank = overallRanker[teamId] ?? 'N/A'; // Get overall rank for the team
+                row.getCell(mainHeaders.length).value = overallRank; // Update the overall rank column
             }
         });
 
+        // Return the Excel file
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', 'attachment; filename=tournament_scores.xlsx');
-
         await workbook.xlsx.write(res);
         res.end();
     } catch (error) {
-        console.error('Error exporting tournament scores:', error);
+        console.error('Error exporting scores to Excel:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };

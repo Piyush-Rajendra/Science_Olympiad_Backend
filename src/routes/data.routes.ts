@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { addTournament, getAllTournaments, editTournament, deleteTournament, getTourneyById, getCurrentTournamentIds, getCurrentTournamentsByGroupId, exportTournamentScoresToExcel } from '../controllers/tournament.controller';
-import { updateEventStatus, getEventStatus, getEventSupervisorEventById, updateEventForEventSupervisor, removeEventFromEventSupervisor, addEvent, deleteEvent, editEvent, getAllEvents, getEventById, getEventsByEventSupervisorId, getEventsByTournamentId, addEventToEventSupervisor, getEventsByEventSupervisor, getEventsBySupervisorAndTournamentId, getTotalAbsentByEvent, getEventStatusByEventId, getScorePercentageByEventId, finalizeEventByEventId, getEventsByTournamentAndSupervisor, checkAndUpdateEventStatus } from '../controllers/event.controller';
+import { updateEventStatus, getEventStatus, getEventSupervisorEventById, updateEventForEventSupervisor, removeEventFromEventSupervisor, addEvent, deleteEvent, editEvent, getAllEvents, getEventById, getEventsByEventSupervisorId, getEventsByTournamentId, addEventToEventSupervisor, getEventsByEventSupervisor, getEventsBySupervisorAndTournamentId, getTotalAbsentByEvent, getEventStatusByEventId, getScorePercentageByEventId, finalizeEventByEventId, getEventsByTournamentAndSupervisor, checkAndUpdateEventStatus, getEventSupervisorIdByEmail } from '../controllers/event.controller';
 import { addSchool, deleteSchool, editSchool, getAllSchools, getSchoolById } from '../controllers/school.controller';
 import { addTeam, deleteTeam, editTeam, getAllTeams, getTeamById, getTeamsBySchoolId } from '../controllers/team.controllers';
 import { addScore, deleteScore, editScore, getScoreById, getScoresByEventId, getScoresBySchoolGroupId, getScoresBySchoolId, getScoresByTeamId, getScoresByTournamentId } from '../controllers/score.controllers';
@@ -79,6 +79,7 @@ router.put('/event/:event_id/status', updateEventStatus);
 router.get('/get-event-status/:eventId', getEventStatusByEventId); 
 router.get('/get-score-percentage/:eventId', getScorePercentageByEventId);
 router.put('/event/:eventId/finalize', finalizeEventByEventId);
+router.get('/get-eventSupervisor-id', getEventSupervisorIdByEmail);
 
 // Timeblock
 router.post('/add-timeblocks', addTimeblocks);
