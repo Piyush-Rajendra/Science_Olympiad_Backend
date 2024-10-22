@@ -307,21 +307,24 @@ export const updateAttendStatus = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'Invalid value for Attend. Must be a boolean.' });
         }
 
-        // SQL query to update the Attend value
+        // Determine the Tier based on Attend value
+        const tier = attend ? 1 : 4;
+
+        // SQL query to update the Attend and Tier values
         const [result] = await pool.execute(
             `UPDATE TeamTimeBlock 
-             SET Attend = ? 
+             SET Attend = ?, Tier = ? 
              WHERE TeamTimeBlock_ID = ?`,
-            [attend, teamTimeBlockId]
+            [attend, tier, teamTimeBlockId]
         );
 
         if ((result as any).affectedRows === 0) {
             return res.status(404).json({ message: 'TeamTimeBlock not found' });
         }
 
-        res.json({ message: 'Attend status updated successfully' });
+        res.json({ message: 'Attend status and Tier updated successfully' });
     } catch (error) {
-        console.error('Error updating Attend status:', error);
+        console.error('Error updating Attend status and Tier:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
