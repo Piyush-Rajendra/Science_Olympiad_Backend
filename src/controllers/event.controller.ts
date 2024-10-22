@@ -219,6 +219,33 @@ export const addEventToEventSupervisor = async (req: Request, res: Response) => 
   }
 }
 
+export const getEventSupervisorIdByEmail = async (req, res) => {
+    const { email } = req.query; // Get the email from query params
+  
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+  
+    try {
+      // Query the database to get the eventSupervisor_id by email
+      const [rows] = await pool.execute(
+        'SELECT eventSupervisor_id FROM eventsupervisor WHERE email = ?',
+        [email]
+      ) as [any[], any];;
+  
+      if (rows.length === 0) {
+        return res.status(404).json({ message: 'Event Supervisor not found' });
+      }
+  
+      // Send back the eventSupervisor_id
+      const eventSupervisor_id = rows[0].eventSupervisor_id;
+      res.status(200).json({ eventSupervisor_id });
+    } catch (error) {
+      console.error('Error retrieving eventSupervisor:', error);
+      res.status(500).json({ message: 'Error retrieving event supervisor', error });
+    }
+  };
+
 export const getEventsByEventSupervisor = async (req: Request, res: Response) => {
     const eventSupervisorId = parseInt(req.params.id);
 

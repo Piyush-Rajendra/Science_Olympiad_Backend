@@ -491,7 +491,7 @@ export const registerEventSupervisor = async (req: Request, res: Response) => {
 
     await transporter.sendMail(mailOptions);
 
-    res.status(201).json({ message: 'Event Supervisor registered successfully and email sent' });
+    res.status(201).json({ message: 'Event Supervisor registered successfully and email sent', eventSupervisor_id: newEventSupervisor.eventSupervisor_id });
   } catch (error) {
     res.status(500).json({ message: 'Error registering event supervisor', error });
   }
@@ -664,13 +664,14 @@ export const updateEventSupervisor = async (req: Request, res: Response) => {
   try {
     const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
     
-    await pool.execute('UPDATE eventsupervisor SET group_id = ?, email = ?, username = ?, password = ? WHERE eventSupervisor_id = ?', [
+    await pool.execute('UPDATE eventsupervisor SET school_group_id = ?, firstName = ?, lastName = ?, email = ?, username = ?, password = ? WHERE eventSupervisor_id = ?', [
       school_group_id,
       firstName,
       lastName,
       email,
       username,
-      hashedPassword
+      hashedPassword,
+      eventSupervisor_id
     ]);
 
     res.status(200).json({ message: 'Event Supervisor updated successfully' });
