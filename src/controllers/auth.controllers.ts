@@ -341,7 +341,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: 'Username and password are required' });
+    return res.status(400).json({ message: 'Email and password are required' });
   }
 
   try {
@@ -361,7 +361,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
 
     const token = jwt.sign({ id: admin.admin_id }, secretKey, { expiresIn: '1h' });
 
-    res.status(200).json({ message: 'Login successful', token });
+    res.status(200).json({ message: 'Login successful', token, school_group_id: admin.school_group_id});
   } catch (error) {
     res.status(500).json({ message: 'Error logging in', error });
   }
@@ -369,7 +369,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
 
 export const getAllAdmins = async (req: Request, res: Response) => {
   try {
-    const [rows]: any = await pool.execute('SELECT school_group_id, firstName, lastName, email, username, password, isTournamentDirector FROM admin');
+    const [rows]: any = await pool.execute('SELECT admin_id, school_group_id, firstName, lastName, email, username, password, isTournamentDirector FROM admin');
     res.status(200).json(rows);
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving admin', error });
@@ -499,7 +499,7 @@ export const registerEventSupervisor = async (req: Request, res: Response) => {
 
     await transporter.sendMail(mailOptions);
 
-    res.status(201).json({ message: 'Event Supervisor registered successfully and email sent' });
+    res.status(201).json({ message: 'Event Supervisor registered successfully and email sent', eventSupervisor_id: newEventSupervisor.eventSupervisor_id });
   } catch (error) {
     res.status(500).json({ message: 'Error registering event supervisor', error });
   }
@@ -614,16 +614,15 @@ export const changePasswordEventSupervisor = async (req: Request, res: Response)
   }
 };
 
-
-
 export const loginEventSupervisor = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: 'email and password are required' });
+    return res.status(400).json({ message: 'Email and password are required' });
   }
 
   try {
+    // Modified query to also select school_group_id
     const [rows]: any = await pool.execute('SELECT * FROM eventsupervisor WHERE email = ?', [email]);
 
     if (rows.length === 0) {
@@ -632,15 +631,23 @@ export const loginEventSupervisor = async (req: Request, res: Response) => {
 
     const eventSupervisor: IEventSupervisor = rows[0];
 
+    // Compare the provided password with the stored hashed password
     const isMatch = await bcrypt.compare(password, eventSupervisor.password);
 
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
+    // Create a JWT token
     const token = jwt.sign({ id: eventSupervisor.eventSupervisor_id }, secretKey, { expiresIn: '1h' });
 
-    res.status(200).json({ message: 'Login successful', token });
+    // Respond with the token and school_group_id
+    res.status(200).json({
+      message: 'Login successful',
+      token,
+      school_group_id: eventSupervisor.school_group_id, // Include school_group_id in the response
+      eventSupervisor_id: eventSupervisor.eventSupervisor_id
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error logging in', error });
   }
@@ -648,7 +655,7 @@ export const loginEventSupervisor = async (req: Request, res: Response) => {
 
 export const getAllEventSupervisors = async (req: Request, res: Response) => {
   try {
-    const [rows]: any = await pool.execute('SELECT school_group_id, email, username, password,firstName,lastName FROM eventsupervisor');
+    const [rows]: any = await pool.execute('SELECT eventSupervisor_id, school_group_id, email, username, password,firstName,lastName FROM eventsupervisor');
     res.status(200).json(rows);
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving event supervisors', error });
@@ -665,13 +672,14 @@ export const updateEventSupervisor = async (req: Request, res: Response) => {
   try {
     const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
     
-    await pool.execute('UPDATE eventsupervisor SET group_id = ?, email = ?, username = ?, password = ? WHERE eventSupervisor_id = ?', [
+    await pool.execute('UPDATE eventsupervisor SET school_group_id = ?, firstName = ?, lastName = ?, email = ?, username = ?, password = ? WHERE eventSupervisor_id = ?', [
       school_group_id,
       firstName,
       lastName,
       email,
       username,
-      hashedPassword
+      hashedPassword,
+      eventSupervisor_id
     ]);
 
     res.status(200).json({ message: 'Event Supervisor updated successfully' });

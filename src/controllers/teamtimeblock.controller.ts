@@ -69,8 +69,8 @@ export const editTeamTimeBlock = async (req: Request, res: Response) => {
                 event_id,
                 attend,
                 comment || '', // Default to empty string if comment is not provided
-                tier || 0, // Default tier to 0 if not provided
-                score || 0.0, // Default score to 0.0 if not provided
+                tier || 1, // Default tier to 1 if not provided
+                score !== undefined ? score : null, // Use score directly if it's defined, else default to null
                 teamTimeBlockId, // Use the team time block ID from the URL
             ]
         );
@@ -88,6 +88,7 @@ export const editTeamTimeBlock = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Error updating team time block', error: error.message });
     }
 };
+
 
 export const deleteTeamTimeBlock = async (req: Request, res: Response) => {
     const teamTimeBlockId = parseInt(req.params.id); // Get team time block ID from the URL
@@ -271,4 +272,105 @@ export const updateTeamTimeBlockComment = async (req: Request, res: Response): P
         res.status(500).json({ message: 'Error updating comment' });
     }
 };
+
+export const getAttendStatus = async (req: Request, res: Response) => {
+    try {
+        const { teamTimeBlockId } = req.params;
+
+        // SQL query to get the Attend value
+        const [rows] = await pool.execute(
+            `SELECT Attend 
+             FROM TeamTimeBlock 
+             WHERE TeamTimeBlock_ID = ?`,
+            [teamTimeBlockId]
+        );
+
+        if ((rows as any).length === 0) {
+            return res.status(404).json({ message: 'TeamTimeBlock not found' });
+        }
+
+        const attend = (rows as any)[0].Attend;
+        res.json({ attend });
+    } catch (error) {
+        console.error('Error getting Attend status:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+export const updateAttendStatus = async (req: Request, res: Response) => {
+    try {
+        const { teamTimeBlockId } = req.params;
+        const { attend } = req.body; // Make sure the client sends a boolean value for attend
+
+        // Validate the input (attend must be a boolean)
+        if (typeof attend !== 'boolean') {
+            return res.status(400).json({ message: 'Invalid value for Attend. Must be a boolean.' });
+        }
+
+        // Determine the Tier based on Attend value
+        const tier = attend ? 1 : 4;
+
+        // SQL query to update the Attend and Tier values
+        const [result] = await pool.execute(
+            `UPDATE TeamTimeBlock 
+             SET Attend = ?, Tier = ? 
+             WHERE TeamTimeBlock_ID = ?`,
+            [attend, tier, teamTimeBlockId]
+        );
+
+        if ((result as any).affectedRows === 0) {
+            return res.status(404).json({ message: 'TeamTimeBlock not found' });
+        }
+
+        res.json({ message: 'Attend status and Tier updated successfully' });
+    } catch (error) {
+        console.error('Error updating Attend status and Tier:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+export const getTeamTimeBlockWithSchoolById = async (req: Request, res: Response) => {
+    const { id } = req.params;
+  
+    try {
+      const [rows] = await pool.execute(`
+        SELECT School.name AS schoolName
+        FROM TeamTimeBlock
+        JOIN Team ON TeamTimeBlock.Team_ID = Team.team_id
+        JOIN School ON Team.school_id = School.ID
+        WHERE TeamTimeBlock.TeamTimeBlock_ID = ?
+      `, [id]);
+  
+      if ((rows as any).length === 0) {
+        return res.status(404).json({ message: 'Team TimeBlock not found' });
+      }
+  
+      res.json(rows[0]);
+    } catch (error) {
+      console.error('Error fetching school name by Team TimeBlock ID', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  };
+
+  export const getUniqueIdByTeamTimeBlockId = async (req: Request, res: Response) => {
+    const { id } = req.params;
+  
+    try {
+      const [rows] = await pool.execute(`
+        SELECT Team.unique_id
+        FROM TeamTimeBlock
+        JOIN Team ON TeamTimeBlock.Team_ID = Team.team_id
+        WHERE TeamTimeBlock.TeamTimeBlock_ID = ?
+      `, [id]);
+  
+      if ((rows as any).length === 0) {
+        return res.status(404).json({ message: 'Team TimeBlock not found' });
+      }
+  
+      res.json(rows[0]);
+    } catch (error) {
+      console.error('Error fetching unique ID by Team TimeBlock ID', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  };
 
