@@ -5,8 +5,10 @@ import pool from '../../config/db.config';
 import { IAdmin, IEventSupervisor, ISuperadmin, IUser} from '../models/auth.model';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
+require('dotenv').config();
 
-const secretKey = 'UGA';
+
+const secretKey = process.env.secretKey;
 
 // Super Admin 
 
@@ -170,22 +172,28 @@ export const registerAdmin = async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'Email and username are required' });
   }
 
-  // Generate a random password
-  const randomPassword = crypto.randomBytes(8).toString('hex');
-  const hashedPassword = await bcrypt.hash(randomPassword, 10);
-
-  const newAdmin: IAdmin = {
-    admin_id: 0,
-    school_group_id,
-    firstName,
-    lastName,
-    email,
-    username,
-    password: hashedPassword,
-    isTournamentDirector,
-  };
-
   try {
+    // Check if the email already exists
+    const [rows]: any = await pool.execute('SELECT * FROM admin WHERE email = ?', [email]);
+
+    if (rows.length > 0) {
+      return res.status(409).json({ message: 'Email is already in use' }); // Conflict error
+    }
+    // Generate a random password
+    const randomPassword = crypto.randomBytes(8).toString('hex');
+    const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+    const newAdmin: IAdmin = {
+      admin_id: 0,
+      school_group_id,
+      firstName,
+      lastName,
+      email,
+      username,
+      password: hashedPassword,
+      isTournamentDirector,
+    };
+
     // Insert the new admin into the database
     await pool.execute('INSERT INTO admin (school_group_id, firstName, lastName, email, username, password, isTournamentDirector) VALUES (?, ?, ?, ?, ?, ?, ?)', [
       newAdmin.school_group_id,
@@ -201,17 +209,17 @@ export const registerAdmin = async (req: Request, res: Response) => {
     const transporter = nodemailer.createTransport({
       service: 'Gmail',
       auth: {
-        user: 'ecinemabooking387@gmail.com',
-        pass: 'injgdluouhraowjt', // Use environment variable for security
+        user: 'epochscoringsystem@gmail.com',
+        pass: process.env.password, // Use environment variable for security
       },
     });
 
     const mailOptions = {
-      from: '"EPOCH SCORING SYSTEM" <ecinemabooking387@gmail.com>',
+      from: '"EPOCH SCORING SYSTEM" <epochscoringsystem@gmail.com>',
       to: newAdmin.email,
       subject: 'Profile Created - Change Your Password',
       text: `Dear ${newAdmin.firstName},\n\nYour admin profile has been created successfully. Please use the following temporary password to log in: ${randomPassword}\n\nPlease change your password immediately after logging in.\n\nThank you!`,
-    };
+    };  
 
     await transporter.sendMail(mailOptions);
 
@@ -248,8 +256,8 @@ export const forgotPassword = async (req: Request, res: Response) => {
     const transporter = nodemailer.createTransport({
       service: 'Gmail',
       auth: {
-        user: 'ecinemabooking387@gmail.com',
-        pass: "injgdluouhraowjt" // Use environment variable for security
+        user: 'epochscoringsystem@gmail.com',
+        pass: process.env.password, // Use environment variable for security
       },
     });
 
@@ -525,8 +533,8 @@ export const forgotPasswordES = async (req: Request, res: Response) => {
     const transporter = nodemailer.createTransport({
       service: 'Gmail',
       auth: {
-        user: 'ecinemabooking387@gmail.com',
-        pass: "injgdluouhraowjt" // Use environment variable for security
+        user: 'epochscoringsystem@gmail.com',
+        pass: process.env.password, // Use environment variable for security
       },
     });
 
