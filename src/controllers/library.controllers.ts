@@ -127,7 +127,31 @@ export const createQuestion = async (req: Request, res: Response) => {
       res.status(500).json({ message: 'Error creating question', error: error.message });
     }
   };
-  
+
+  export const getQandAByQuestionAndSchoolGroupId = async (req: Request, res: Response) => {
+    const { Question, schoolGroup_id } = req.params;
+
+    // Validate input
+    if (!Question || !schoolGroup_id) {
+        return res.status(400).json({ message: 'Question and schoolGroup_id are required' });
+    }
+
+    try {
+        const [result]: any = await pool.execute(
+            'SELECT QandA_id, Question, Answer, isAnswered FROM QandA WHERE Question = ? AND schoolGroup_id = ?',
+            [Question, schoolGroup_id]
+        );
+
+        if (result.length === 0) {
+            return res.status(404).json({ message: 'Question not found for the given schoolGroup_id' });
+        }
+
+        res.status(200).json(result[0]); // Return the QandA_id and related details found
+    } catch (error) {
+        console.error('Error retrieving question and answer:', error);
+        res.status(500).json({ message: 'Error retrieving question and answer', error: error.message });
+    }
+};
 
 // Delete a question
 export const deleteQuestion = async (req: Request, res: Response) => {
