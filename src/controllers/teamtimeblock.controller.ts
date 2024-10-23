@@ -374,3 +374,47 @@ export const getTeamTimeBlockWithSchoolById = async (req: Request, res: Response
     }
   };
 
+  export const getTeamTimeBlocksByTimeBlockIdDetailed = async (req: Request, res: Response) => {
+    const timeBlockId = parseInt(req.params.id); // Get TimeBlock ID from the URL
+
+    if (isNaN(timeBlockId)) {
+        return res.status(400).json({ message: 'Invalid time block ID' });
+    }
+
+    try {
+        // Execute the select query
+        const [rows] = await pool.execute(
+            `
+            SELECT 
+                tt.TeamTimeBlock_ID,
+                tt.Attend,
+                tt.Comment,
+                tt.Tier,
+                tt.Score,
+                t.name AS team_name,
+                s.flight
+            FROM 
+                TeamTimeBlock tt
+            JOIN 
+                Team t ON tt.Team_ID = t.team_id
+            JOIN 
+                School s ON t.school_id = s.ID
+            WHERE 
+                tt.TimeBlock_ID = ?
+            `,
+            [timeBlockId]
+        );
+
+        // Check if any rows were returned
+        if (Array.isArray(rows) && rows.length === 0) {
+            return res.status(404).json({ message: 'No team time blocks found for this time block' });
+        }
+
+        // Return the found team time blocks
+        res.status(200).json(rows); // Return all found results
+    } catch (error) {
+        console.error('Error retrieving team time blocks:', error);
+        res.status(500).json({ message: 'Error retrieving team time blocks', error: error.message });
+    }
+};
+
