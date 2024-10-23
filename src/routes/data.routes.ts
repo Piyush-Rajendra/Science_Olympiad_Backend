@@ -6,7 +6,7 @@ import { addTeam, deleteTeam, editTeam, getAllTeams, getTeamById, getTeamsByScho
 import { addScore, deleteScore, editScore, getScoreById, getScoresByEventId, getScoresBySchoolGroupId, getScoresBySchoolId, getScoresByTeamId, getScoresByTournamentId } from '../controllers/score.controllers';
 import { updateTimeBlockStatus, getTimeBlockStatus, addTimeblocks, editTimeblock, deleteTimeblock, getTimeblocksByEventId, getTimeblocksByTournamentId} from '../controllers/timeblock.controller'
 import { addSchoolGroup, deleteSchoolGroup, editSchoolGroup, getAllSchoolGroups } from '../controllers/schoolgroups.controllers'
-import { getTeamTimeBlockWithSchoolById,getUniqueIdByTeamTimeBlockId, updateAttendStatus, getAttendStatus, updateTeamTimeBlockComment, getTeamTimeBlockComment, addTeamTimeBlock, deleteTeamTimeBlock, editTeamTimeBlock, getTeamTimeBlockById, getTeamTimeBlocksByEventId, getTeamTimeBlocksByTeamId, getTeamTimeBlocksByTimeBlockId } from '../controllers/teamtimeblock.controller';
+import { getTeamTimeBlockWithSchoolById,getUniqueIdByTeamTimeBlockId, updateAttendStatus, getAttendStatus, updateTeamTimeBlockComment, getTeamTimeBlockComment, addTeamTimeBlock, deleteTeamTimeBlock, editTeamTimeBlock, getTeamTimeBlockById, getTeamTimeBlocksByEventId, getTeamTimeBlocksByTeamId, getTeamTimeBlocksByTimeBlockId, getTeamTimeBlocksByTimeBlockIdDetailed } from '../controllers/teamtimeblock.controller';
 import { getTournamentHistoryBySchoolGroup, addTournamentHistory, downloadTournamentHistory } from '../controllers/tournamentHistory.controllers';
 import multer from 'multer';
 
@@ -99,6 +99,7 @@ router.delete('/delete-team-timeblock/:id', deleteTeamTimeBlock);
 router.get('/get-team-timeblocks-by-id/:id', getTeamTimeBlockById);
 router.get('/get-team-timeblocks-by-team/:teamId', getTeamTimeBlocksByTeamId);
 router.get('/get-team-timeblocks-by-timeblock/:timeBlockId', getTeamTimeBlocksByTimeBlockId);
+router.get('/get-team-timeblocks-by-timeblock-detailed/:id', getTeamTimeBlocksByTimeBlockIdDetailed);
 router.get('/get-team-timeblocks-by-event/:eventId', getTeamTimeBlocksByEventId);
 router.get('/team-timeblock/:TeamTimeBlock_ID/comment', getTeamTimeBlockComment);
 router.put('/team-timeblock/:TeamTimeBlock_ID/comment', updateTeamTimeBlockComment);
