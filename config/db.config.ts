@@ -1,10 +1,11 @@
 import { createPool, Pool } from 'mysql2/promise';
+require('dotenv').config();
 
 const pool: Pool = createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'science_olympiad',
+  host: process.env.host,
+  user: process.env.user,
+  password: process.env.password,
+  database: process.env.database,
   connectionLimit: 10
 });
 
@@ -12,8 +13,7 @@ pool.getConnection()
 .then(async connection => {
   console.log('Database connection established');
 
-  // Check if the database exists, create it if it doesn't
-  await connection.query(`CREATE DATABASE IF NOT EXISTS science_olympiad`);
+  await connection.query(`CREATE DATABASE IF NOT EXISTS hsi21joo4cb74ayy`);
 
   connection.release();
 })
@@ -22,7 +22,7 @@ pool.getConnection()
 })
 .catch(error => {
   console.error('Error connecting to database:', error.message);
-  process.exit(1); // Exit the process or handle the error as per your application's needs
+  process.exit(1);
 });
 
 export default pool;
