@@ -447,7 +447,7 @@ export const getAdminById = async (req: Request, res: Response) => {
 
 
 export const registerEventSupervisor = async (req: Request, res: Response) => {
-  const { school_group_id, email, username, firstName, lastName } = req.body;
+  const { school_group_id, email, username, firstName, lastName, tournament_id } = req.body;
 
   if (!email || !username) {
     return res.status(400).json({ message: 'Email and username are required' });
@@ -465,12 +465,13 @@ export const registerEventSupervisor = async (req: Request, res: Response) => {
     email,
     username,
     password: hashedPassword,
+    tournament_id,
   };
 
   try {
     // Insert the new event supervisor into the database
     await pool.execute(
-      'INSERT INTO eventsupervisor (school_group_id, email, username, password, firstName, lastName) VALUES (?, ?, ?, ?, ?, ?)', 
+      'INSERT INTO eventsupervisor (school_group_id, email, username, password, firstName, lastName, tournament_id) VALUES (?, ?, ?, ?, ?, ?, ?)', 
       [
         newEventSupervisor.school_group_id,
         newEventSupervisor.email,
@@ -478,6 +479,7 @@ export const registerEventSupervisor = async (req: Request, res: Response) => {
         newEventSupervisor.password,
         newEventSupervisor.firstName,
         newEventSupervisor.lastName,
+        newEventSupervisor.tournament_id,
       ]
     );
 
