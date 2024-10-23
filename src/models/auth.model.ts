@@ -7,6 +7,7 @@
     email: string;
     username: string;
     password: string;
+    tournament_id: number;
   }
 
   export interface IUser {
