@@ -157,7 +157,7 @@ export const createDataTables = async () => {
             event_id INT,
             eventSupervisor_id INT,
             FOREIGN KEY (event_id) REFERENCES Event(event_id) ON DELETE CASCADE ON UPDATE CASCADE,            
-            FOREIGN KEY (eventSupervisor_id) REFERENCES EventSupervisor(eventSupervisor_id) ON DELETE CASCADE ON UPDATE CASCADE
+            FOREIGN KEY (eventSupervisor_id) REFERENCES eventsupervisor(eventSupervisor_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
     `);
 
