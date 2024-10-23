@@ -15,6 +15,7 @@
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",
     "backend": "^0.0.0",
+    "@types/multer": "^1.4.12",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
@@ -24,6 +25,7 @@
     "exceljs": "^4.4.0",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
     "mysql": "^2.18.1",
     "mysql2": "^3.10.2",
     "nodemailer": "^6.9.15",

@@ -39,28 +39,7 @@ export const createDataTables = async () => {
         )
     `);
 
-    // Create School table
-    await pool.execute(`
-        CREATE TABLE IF NOT EXISTS School (
-        ID INT AUTO_INCREMENT PRIMARY KEY,
-        school_group_id INT,
-        name VARCHAR(255) NOT NULL,
-        flight VARCHAR(50) NOT NULL,
-        FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE
-        );
-    `);
     
-    //Create Team Table
-    await pool.execute(`
-        CREATE TABLE IF NOT EXISTS Team (
-        team_id INT AUTO_INCREMENT PRIMARY KEY,
-        school_id INT,
-        name VARCHAR(255) NOT NULL,
-        unique_id VARCHAR(100) NOT NULL,
-        FOREIGN KEY (school_id) REFERENCES School(ID) ON DELETE CASCADE ON UPDATE CASCADE
-        );
-        `)
-
     // Create Tournament table
     await pool.execute(`
         CREATE TABLE IF NOT EXISTS Tournament (
@@ -77,6 +56,33 @@ export const createDataTables = async () => {
             FOREIGN KEY (group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
     `);
+
+    // Create School table
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS School (
+        ID INT AUTO_INCREMENT PRIMARY KEY,
+        school_group_id INT,
+        tournament_id  INT, 
+        name VARCHAR(255) NOT NULL,
+        flight VARCHAR(50) NOT NULL,
+        FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (tournament_id) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
+        );
+    `);
+    
+    //Create Team Table
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS Team (
+        team_id INT AUTO_INCREMENT PRIMARY KEY,
+        school_id INT,
+        tournament_id  INT, 
+        name VARCHAR(255) NOT NULL,
+        unique_id VARCHAR(100) NOT NULL,
+        FOREIGN KEY (school_id) REFERENCES School(ID) ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY (tournament_id) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
+        );
+        `)
+
 
     // Create Event table
     await pool.execute(`
@@ -151,7 +157,7 @@ export const createDataTables = async () => {
             event_id INT,
             eventSupervisor_id INT,
             FOREIGN KEY (event_id) REFERENCES Event(event_id) ON DELETE CASCADE ON UPDATE CASCADE,            
-            FOREIGN KEY (eventSupervisor_id) REFERENCES EventSupervisor(eventSupervisor_id) ON DELETE CASCADE ON UPDATE CASCADE
+            FOREIGN KEY (eventSupervisor_id) REFERENCES eventsupervisor(eventSupervisor_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
     `);
 
@@ -159,10 +165,11 @@ export const createDataTables = async () => {
     await pool.execute(`
         CREATE TABLE IF NOT EXISTS TournamentHistory (
             tournament_history_id INT AUTO_INCREMENT PRIMARY KEY,
-            tournament_id INT,
-            school_group_id INT,
-            excelmasterscore TEXT,
-            FOREIGN KEY (tournament_id) REFERENCES Tournament (tournament_id) ON DELETE CASCADE ON UPDATE CASCADE,
+            school_group_id INT NOT NULL,
+            excelmasterscore LONGBLOB, 
+            date DATETIME,
+            name VARCHAR(255),
+            division VARCHAR(255),
             FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE
         )
     `);

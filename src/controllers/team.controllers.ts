@@ -3,10 +3,10 @@ import pool from '../../config/db.config';
 import { ITeam } from '../models/data.models'; // Adjust the import path
 
 export const addTeam = async (req: Request, res: Response) => {
-    const { school_id, name, unique_id } = req.body;
+    const { school_id, name, unique_id, tournament_id } = req.body;
 
     // Validate required fields
-    if (!school_id || !name || !unique_id) {
+    if (!school_id || !name || !unique_id || !tournament_id) {
         return res.status(400).json({ message: 'School ID, team name, and unique ID are required' });
     }
 
@@ -16,15 +16,17 @@ export const addTeam = async (req: Request, res: Response) => {
         school_id,
         name,
         unique_id,
+        tournament_id,
     };
 
     try {
         const [result] = await pool.execute(
-            'INSERT INTO Team (school_id, name, unique_id) VALUES (?, ?, ?)',
+            'INSERT INTO Team (school_id, name, unique_id, tournament_id) VALUES (?, ?, ?, ?)',
             [
                 newTeam.school_id,
                 newTeam.name,
                 newTeam.unique_id,
+                newTeam.tournament_id,
             ]
         );
 
@@ -96,14 +98,14 @@ export const getAllTeams = async (req: Request, res: Response) => {
 
 export const editTeam = async (req: Request, res: Response) => {
     const teamId = parseInt(req.params.id); // Get the team ID from the URL
-    const { school_id, name, unique_id } = req.body;
+    const { school_id, name, unique_id, tournament_id } = req.body;
 
     if (isNaN(teamId)) {
         return res.status(400).json({ message: 'Invalid team ID' });
     }
 
     // Validate required fields
-    if (!school_id || !name || !unique_id) {
+    if (!school_id || !name || !unique_id || !tournament_id) {
         return res.status(400).json({ message: 'School ID, team name, and unique ID are required' });
     }
 
@@ -116,7 +118,9 @@ export const editTeam = async (req: Request, res: Response) => {
                 school_id,
                 name,
                 unique_id,
+                tournament_id,
                 teamId, // Use the team ID from the URL
+                
             ]
         );
 
@@ -153,6 +157,29 @@ export const getTeamsBySchoolId = async (req: Request, res: Response) => {
         res.status(200).json(teams);
     } catch (error) {
         console.error('Error retrieving teams by school ID:', error);
+        res.status(500).json({ message: 'Error retrieving teams', error: error.message });
+    }
+};
+
+export const getTeamsByTournamentId = async (req: Request, res: Response) => {
+    const tournamentId = parseInt(req.params.tournamentId); // Get tournament ID from the URL
+
+    if (isNaN(tournamentId)) {
+        return res.status(400).json({ message: 'Invalid tournament ID' });
+    }
+
+    try {
+        // Execute the query to get teams by tournament ID
+        const [teams] = await pool.execute('SELECT * FROM Team WHERE tournament_id = ?', [tournamentId]) as [ITeam[], any];
+
+        // Check if teams is an empty array
+        if (teams.length === 0) {
+            return res.status(404).json({ message: 'No teams found for this tournament ID' });
+        }
+
+        res.status(200).json(teams);
+    } catch (error) {
+        console.error('Error retrieving teams by tournament ID:', error);
         res.status(500).json({ message: 'Error retrieving teams', error: error.message });
     }
 };
