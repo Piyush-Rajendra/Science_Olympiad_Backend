@@ -8,7 +8,7 @@ import pool from '../config/db.config';
 import { createDataTables } from './middlewares/data.middleware';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 app.use(bodyParser.json());
 app.use(cors());
