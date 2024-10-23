@@ -361,7 +361,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
 
     const token = jwt.sign({ id: admin.admin_id }, secretKey, { expiresIn: '1h' });
 
-    res.status(200).json({ message: 'Login successful', token, school_group_id: admin.school_group_id});
+    res.status(200).json({ message: 'Login successful', token, school_group_id: admin.school_group_id, isTournamentDirector: admin.isTournamentDirector});
   } catch (error) {
     res.status(500).json({ message: 'Error logging in', error });
   }
