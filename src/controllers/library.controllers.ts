@@ -102,31 +102,32 @@ export const uploadMiddleware = upload.single('pdf');
 
 // Create a question
 export const createQuestion = async (req: Request, res: Response) => {
-  const { schoolGroup_id, Question } = req.body;
-
-  // Validate input
-  if (!schoolGroup_id || !Question) {
+    const { schoolGroup_id, Question, Answer } = req.body;
+  
+    // Validate input
+    if (!schoolGroup_id || !Question) {
       return res.status(400).json({ message: 'schoolGroup_id and Question are required' });
-  }
-
-  try {
+    }
+  
+    try {
       const createdOn = new Date();
-      const isAnswered = 0; // Question is initially unanswered
-
+      const isAnswered = Answer ? 1 : 0; // Set isAnswered to 1 if an answer is provided, otherwise 0
+  
       const [result]: any = await pool.execute(
-          'INSERT INTO QandA (schoolGroup_id, Question, isAnswered, createdOn, lastUpdated) VALUES (?, ?, ?, ?, ?)',
-          [schoolGroup_id, Question, isAnswered, createdOn, createdOn]
+        'INSERT INTO QandA (schoolGroup_id, Question, Answer, isAnswered, createdOn, lastUpdated) VALUES (?, ?, ?, ?, ?, ?)',
+        [schoolGroup_id, Question, Answer || null, isAnswered, createdOn, createdOn]
       );
-
+  
       res.status(201).json({
-          message: 'Question created successfully',
-          QandA_id: result.insertId
+        message: 'Question created successfully',
+        QandA_id: result.insertId
       });
-  } catch (error) {
+    } catch (error) {
       console.error('Error creating question:', error);
       res.status(500).json({ message: 'Error creating question', error: error.message });
-  }
-};
+    }
+  };
+  
 
 // Delete a question
 export const deleteQuestion = async (req: Request, res: Response) => {
