@@ -384,7 +384,7 @@ export const updateAdmin = async (req: Request, res: Response) => {
   }
 
   try {
-    const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+    // const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
     
     await pool.execute('UPDATE admin SET school_group_id = ?, firstName = ?, lastName = ?, email = ?, username = ?, password = ?, isTournamentDirector = ? WHERE admin_id = ?', [
       school_group_id,
@@ -392,7 +392,7 @@ export const updateAdmin = async (req: Request, res: Response) => {
       lastName,
       email,
       username,
-      hashedPassword,
+      password,
       isTournamentDirector,
       admin_id
     ]);
@@ -670,7 +670,7 @@ export const updateEventSupervisor = async (req: Request, res: Response) => {
   }
 
   try {
-    const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+    // const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
     
     await pool.execute('UPDATE eventsupervisor SET school_group_id = ?, firstName = ?, lastName = ?, email = ?, username = ?, password = ? WHERE eventSupervisor_id = ?', [
       school_group_id,
@@ -678,7 +678,7 @@ export const updateEventSupervisor = async (req: Request, res: Response) => {
       lastName,
       email,
       username,
-      hashedPassword,
+      password,
       eventSupervisor_id
     ]);
 
