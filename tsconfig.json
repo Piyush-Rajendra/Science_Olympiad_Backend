@@ -6,9 +6,13 @@
       "esModuleInterop": true,
       "skipLibCheck": true,
       "forceConsistentCasingInFileNames": true,
-      "outDir": "./app/dist",
-      "rootDir": "./src", 
+     "outDir": "./build",
+      "baseUrl": ".",        // Set this to the root level
+    "paths": {
+      "*": ["build/*"]     // Map all paths to the build folder after compilation
     },
+    "rootDir": "./src", 
+        },
     "include": ["src/**/*.ts"],  
     "exclude": ["node_modules", "dist"]
   }

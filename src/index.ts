@@ -1,9 +1,9 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import authRoutes from '../src/routes/auth.routes';
-import dataRoutes from '../src/routes/data.routes';
-import { createTables } from '.././src/middlewares/auth.middleware';
+import authRoutes from './routes/auth.routes';
+import dataRoutes from './routes/data.routes';
+import { createTables } from './middlewares/auth.middleware';
 import pool from '../src/config/db.config'; // Adjust this path according to the new structure
 import { createDataTables } from './middlewares/data.middleware';
 

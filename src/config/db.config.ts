@@ -14,7 +14,7 @@ pool.getConnection()
   console.log('Database connection established');
 
   // Check if the database exists, create it if it doesn't
-  await connection.query(`CREATE DATABASE IF NOT EXISTS hsi21joo4cb74ayy`);
+  await connection.query(`CREATE DATABASE IF NOT EXISTS oro04mqr28yny1ki`);
 
   connection.release();
 })

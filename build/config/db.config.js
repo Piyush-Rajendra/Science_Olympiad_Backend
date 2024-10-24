@@ -22,7 +22,7 @@ pool.getConnection()
     .then((connection) => __awaiter(void 0, void 0, void 0, function* () {
     console.log('Database connection established');
     // Check if the database exists, create it if it doesn't
-    yield connection.query(`CREATE DATABASE IF NOT EXISTS hsi21joo4cb74ayy`);
+    yield connection.query(`CREATE DATABASE IF NOT EXISTS oro04mqr28yny1ki`);
     connection.release();
 }))
     .then(() => {
