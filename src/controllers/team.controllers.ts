@@ -112,7 +112,7 @@ export const editTeam = async (req: Request, res: Response) => {
     try {
         const [result] = await pool.execute(
             `UPDATE Team 
-             SET school_id = ?, name = ?, unique_id = ?
+             SET school_id = ?, name = ?, unique_id = ? tournament_id = ?
              WHERE team_id = ?`,
             [
                 school_id,
