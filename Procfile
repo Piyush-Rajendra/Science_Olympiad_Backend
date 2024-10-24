@@ -1,2 +1,2 @@
 web: npm run build && npm start
-web: node ./src/index.js
+web: node .dist/index.js
