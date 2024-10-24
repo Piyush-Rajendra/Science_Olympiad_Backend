@@ -133,6 +133,7 @@ export interface IQandA {
   isAnswered: number;
   lastUpdated: Date;
   createdOn: Date;
+}
 // models/RankedTeam.model.ts
 
 export interface RankedTeam {
