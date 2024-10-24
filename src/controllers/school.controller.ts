@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import pool from '../../config/db.config';
+import pool from '../config/db.config';
 import { ISchool } from '../models/data.models'; // Adjust the import path
 
 export const addSchool = async (req: Request, res: Response) => {

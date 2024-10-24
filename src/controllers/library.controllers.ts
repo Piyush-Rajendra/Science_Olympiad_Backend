@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import pool from '../../config/db.config';
+import pool from '../config/db.config';
 import multer from 'multer';
 import { IResourceLibrary, IQandA } from '../models/library.model'; // Adjust the import based on your project structure
 import { RowDataPacket } from 'mysql2';

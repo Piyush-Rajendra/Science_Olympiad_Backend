@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import pool from '../../config/db.config';
+import pool from '../config/db.config';
 import { IEvent, IEventSuperVisorEvent } from '../models/data.models'; // Adjust the import path
 import { RowDataPacket } from 'mysql2';
 import { FieldPacket } from 'mysql2';

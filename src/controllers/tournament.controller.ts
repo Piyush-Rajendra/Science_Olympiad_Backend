@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import pool from '../../config/db.config';
+import pool from '../config/db.config';
 import { ITournament } from '../models/data.models'; // Adjust the import path
 import xlsx from 'xlsx';
 import { Workbook } from 'exceljs'; // Import Workbook from exceljs

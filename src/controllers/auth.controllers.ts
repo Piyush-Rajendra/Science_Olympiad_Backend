@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import pool from '../../config/db.config';
+import pool from '../config/db.config';
 import { IAdmin, IEventSupervisor, ISuperadmin, IUser} from '../models/auth.model';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';

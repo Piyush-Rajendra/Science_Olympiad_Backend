@@ -4,7 +4,7 @@ import cors from 'cors';
 import authRoutes from '../src/routes/auth.routes';
 import dataRoutes from '../src/routes/data.routes';
 import { createTables } from '.././src/middlewares/auth.middleware';
-import pool from '../config/db.config';
+import pool from '../src/config/db.config'; // Adjust this path according to the new structure
 import { createDataTables } from './middlewares/data.middleware';
 
 const app = express();
