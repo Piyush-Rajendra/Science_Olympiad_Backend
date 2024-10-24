@@ -7,19 +7,30 @@ export const addTeam = async (req: Request, res: Response) => {
 
     // Validate required fields
     if (!school_id || !name || !unique_id || !tournament_id) {
-        return res.status(400).json({ message: 'School ID, team name, and unique ID are required' });
+        return res.status(400).json({ message: 'School ID, team name, unique ID, and tournament ID are required' });
     }
 
-    // Create the new team object
-    const newTeam: ITeam = {
-        ID: 0, // Auto-increment handled by the database
-        school_id,
-        name,
-        unique_id,
-        tournament_id,
-    };
-
     try {
+        // Check if a team with the same unique_id already exists
+        const [existingTeam] = await pool.execute(
+            'SELECT * FROM Team WHERE unique_id = ? AND tournament_id = ?',
+            [unique_id, tournament_id]
+        );
+
+        if ((existingTeam as any[]).length > 0) {
+            return res.status(409).json({ message: 'A team with this unique ID already exists in the tournament' });
+        }
+
+        // Create the new team object
+        const newTeam: ITeam = {
+            ID: 0, // Auto-increment handled by the database
+            school_id,
+            name,
+            unique_id,
+            tournament_id,
+        };
+
+        // Insert the new team
         const [result] = await pool.execute(
             'INSERT INTO Team (school_id, name, unique_id, tournament_id) VALUES (?, ?, ?, ?)',
             [
@@ -37,6 +48,7 @@ export const addTeam = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Error adding team', error: error.message });
     }
 };
+
 
 export const getTeamById = async (req: Request, res: Response) => {
     const teamId = parseInt(req.params.id); // Get school ID from the URL
