@@ -403,3 +403,63 @@ export const deletePDF = async (req: Request, res: Response) => {
     }
 };
 
+export const editQA = async (req: Request, res: Response) => {
+    const QandA_id = parseInt(req.params.id); // Get the QandA ID from the URL
+
+    const {
+        Question = null, // Optional field, set to null if not provided
+        Answer = null,   // Optional field, set to null if not provided
+    } = req.body;
+
+    // Check if the QandA ID is valid
+    if (isNaN(QandA_id)) {
+        return res.status(400).json({ message: 'Invalid QandA ID' });
+    }
+
+    // Validate input for at least one field being present
+    if (!Question && !Answer) {
+        return res.status(400).json({ message: 'At least one of Question or Answer must be provided' });
+    }
+
+    try {
+        const lastUpdated = new Date().toISOString(); // Convert date to string format
+
+        // Build the update query dynamically based on provided fields
+        const fieldsToUpdate: string[] = [];
+        const values: (string | null)[] = [];
+
+        if (Question) {
+            fieldsToUpdate.push('Question = ?');
+            values.push(Question);
+        }
+
+        if (Answer) {
+            fieldsToUpdate.push('Answer = ?, isAnswered = 1'); // Mark as answered if answer is provided
+            values.push(Answer);
+        }
+
+        // Add lastUpdated field
+        fieldsToUpdate.push('lastUpdated = ?');
+        values.push(lastUpdated); // Add the formatted date string to values
+
+        // Combine fields for the SQL query
+        const query = `UPDATE QandA SET ${fieldsToUpdate.join(', ')} WHERE QandA_id = ?`;
+        values.push(QandA_id.toString()); // Convert QandA_id to string format for the query
+
+        // Execute the update query
+        const [result] = await pool.execute(query, values);
+
+        // Check if any rows were affected
+        const affectedRows = (result as { affectedRows: number }).affectedRows;
+
+        if (affectedRows === 0) {
+            return res.status(404).json({ message: 'Question not found' });
+        }
+
+        res.status(200).json({ message: 'Question and answer updated successfully' });
+    } catch (error) {
+        console.error('Error updating question and answer:', error);
+        res.status(500).json({ message: 'Error updating question and answer', error: error.message });
+    }
+};
+

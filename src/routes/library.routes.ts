@@ -6,7 +6,8 @@ import { getPDFBySchoolGroupId,
     deleteQuestion,
     addAnswer,
     getQuestion,
-    getAnswersBySchoolGroupId} from '../controllers/library.controllers';
+    getAnswersBySchoolGroupId,
+    editQA} from '../controllers/library.controllers';
 
 const router = express.Router();
 
@@ -20,5 +21,6 @@ router.delete('/questions/:QandA_id', deleteQuestion);
 router.put('/questions/:QandA_id/answer', addAnswer);
 router.get('/questions/:QandA_id', getQuestion);
 router.get('/answers/schoolGroup/:schoolGroup_id', getAnswersBySchoolGroupId);
+
 
 export default router;

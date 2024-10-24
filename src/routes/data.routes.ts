@@ -7,7 +7,7 @@ import { addScore, deleteScore, editScore, getScoreById, getScoresByEventId, get
 import { updateTimeBlockStatus, getTimeBlockStatus, addTimeblocks, editTimeblock, deleteTimeblock, getTimeblocksByEventId, getTimeblocksByTournamentId} from '../controllers/timeblock.controller'
 import { addSchoolGroup, deleteSchoolGroup, editSchoolGroup, getAllSchoolGroups } from '../controllers/schoolgroups.controllers'
 import { getTeamTimeBlockWithSchoolById,getUniqueIdByTeamTimeBlockId, updateAttendStatus, getAttendStatus, updateTeamTimeBlockComment, getTeamTimeBlockComment, addTeamTimeBlock, deleteTeamTimeBlock, editTeamTimeBlock, getTeamTimeBlockById, getTeamTimeBlocksByEventId, getTeamTimeBlocksByTeamId, getTeamTimeBlocksByTimeBlockId } from '../controllers/teamtimeblock.controller';
-import { getPDFBySchoolGroupId, uploadOrUpdatePDF, uploadMiddleware, createQuestion, deleteQuestion, addAnswer, getQuestion, getAnswersBySchoolGroupId,editQuestion, editAnswer, getAnswerByQandAId, getQuestionsBySchoolGroupId, deletePDF, getQandAByQuestionAndSchoolGroupId } from '../controllers/library.controllers';
+import { getPDFBySchoolGroupId, uploadOrUpdatePDF, uploadMiddleware, createQuestion, deleteQuestion, addAnswer, getQuestion, getAnswersBySchoolGroupId,editQuestion, editAnswer, getAnswerByQandAId, getQuestionsBySchoolGroupId, deletePDF, getQandAByQuestionAndSchoolGroupId, editQA } from '../controllers/library.controllers';
 
 const router = Router();
 
@@ -119,6 +119,7 @@ router.put('/questions/:QandA_id/answer', addAnswer);
 router.put('/questions/:QandA_id/edit-answer', editAnswer);
 router.get('/questions/schoolGroup/:schoolGroup_id/answered', getAnswersBySchoolGroupId);
 router.get('/questions/:QandA_id/answer', getAnswerByQandAId);
+router.put('/questions/edit-questions/:id', editQA);
 
 
 //Excel
