@@ -28,7 +28,7 @@ router.get('/get-current-tournaments/:groupId', getCurrentTournamentsByGroupId);
 router.put('/setTournamentToCurrent/:id', setCurrentTournament);
 
 //Tournament History
-router.post('/tournaments/:tournamentId/add-history', addTournamentHistory);
+router.post('/tournaments/:tournamentId/add-history/:groupID', addTournamentHistory);
 router.get('/get-tournament-history/:schoolgroupID', getTournamentHistoryBySchoolGroup);
 router.get('/tournament-history/:id/download', downloadTournamentHistory);
 
