@@ -996,3 +996,45 @@ export const validateToken = (req: Request, res: Response, next: Function) => {
     res.status(400).json({ message: 'Invalid token' });
   }
 };
+
+export const getAdminsByGroupId = async (req: Request, res: Response) => {
+  const groupId = parseInt(req.params.id); // Assuming you will pass the group ID as a route parameter
+
+  try {
+    const [rows]: any = await pool.execute(
+      'SELECT admin_id, school_group_id, firstName, lastName, email, username, password, isTournamentDirector FROM admin WHERE school_group_id = ?',
+      [groupId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'No admins found for this group ID' });
+    }
+
+    res.status(200).json(rows);
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving admins by group ID', error });
+  }
+};
+
+export const getEventSupervisorsByGroupId = async (req: Request, res: Response) => {
+  const groupId = parseInt(req.params.id); // Assuming the group ID is passed as a route parameter
+
+  if (!groupId) {
+    return res.status(400).json({ message: 'Group ID is required' });
+  }
+
+  try {
+    const [rows]: any = await pool.execute(
+      'SELECT * FROM eventsupervisor WHERE school_group_id = ?',
+      [groupId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'No event supervisors found for this group ID' });
+    }
+
+    res.status(200).json(rows); // Return all event supervisors for the specified group
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving event supervisors', error });
+  }
+};

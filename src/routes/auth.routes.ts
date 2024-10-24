@@ -11,7 +11,9 @@ import { register, login, getAllUsers, registerAdmin, loginAdmin, getAllAdmins, 
     changePasswordAdmin,
     changePasswordForgot,
     changePasswordForgotES,
-    forgotPasswordES} from '../controllers/auth.controllers';
+    forgotPasswordES,
+    getAdminsByGroupId,
+    getEventSupervisorsByGroupId} from '../controllers/auth.controllers';
 import { authenticateJWT } from '../middlewares/extractJWT';
 
 const router = Router();
@@ -54,6 +56,8 @@ router.get('/getAllSuperAdmins', authenticateJWT, getAllSuperAdmins);
 router.get('/admin', authenticateJWT, getAllAdmins);
 router.get('/eventsupervisor', authenticateJWT, getAllEventSupervisors)
 router.get('/UserId', authenticateJWT, getAllUsers)
+router.get('/get-admins-by-groupId/:id', authenticateJWT, getAdminsByGroupId)
+router.get('/eventsupervisor-by-groupId/:id', authenticateJWT, getEventSupervisorsByGroupId)
 
 // Get By Id
 router.get('/SAId/:id', authenticateJWT, getSuperAdminById)
