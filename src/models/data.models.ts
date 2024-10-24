@@ -117,6 +117,22 @@ export interface ISchoolGroup {
   name: string;
 }
 
+// models/library.model.ts
+export interface IResourceLibrary {
+  resourceLibrary_id: number;
+  schoolGroup_id: number;
+  pdf_input: Buffer; 
+}
+
+// models/library.model.ts
+export interface IQandA {
+  QandA_id: number;
+  schoolGroup_id: number;
+  Question: String; 
+  Answer: String; 
+  isAnswered: number;
+  lastUpdated: Date;
+  createdOn: Date;
 // models/RankedTeam.model.ts
 
 export interface RankedTeam {

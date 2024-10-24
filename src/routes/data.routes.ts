@@ -6,6 +6,7 @@ import { addTeam, deleteTeam, editTeam, getAllTeams, getTeamById, getTeamsByScho
 import { addScore, deleteScore, editScore, getScoreById, getScoresByEventId, getScoresBySchoolGroupId, getScoresBySchoolId, getScoresByTeamId, getScoresByTournamentId } from '../controllers/score.controllers';
 import { updateTimeBlockStatus, getTimeBlockStatus, addTimeblocks, editTimeblock, deleteTimeblock, getTimeblocksByEventId, getTimeblocksByTournamentId} from '../controllers/timeblock.controller'
 import { addSchoolGroup, deleteSchoolGroup, editSchoolGroup, getAllSchoolGroups } from '../controllers/schoolgroups.controllers'
+import { getPDFBySchoolGroupId, uploadOrUpdatePDF, uploadMiddleware, createQuestion, deleteQuestion, addAnswer, getQuestion, getAnswersBySchoolGroupId,editQuestion, editAnswer, getAnswerByQandAId, getQuestionsBySchoolGroupId, deletePDF, getQandAByQuestionAndSchoolGroupId, editQA } from '../controllers/library.controllers';
 import { getTeamTimeBlockWithSchoolById,getUniqueIdByTeamTimeBlockId, updateAttendStatus, getAttendStatus, updateTeamTimeBlockComment, getTeamTimeBlockComment, addTeamTimeBlock, deleteTeamTimeBlock, editTeamTimeBlock, getTeamTimeBlockById, getTeamTimeBlocksByEventId, getTeamTimeBlocksByTeamId, getTeamTimeBlocksByTimeBlockId, getTeamTimeBlocksByTimeBlockIdDetailed } from '../controllers/teamtimeblock.controller';
 import { getTournamentHistoryBySchoolGroup, addTournamentHistory, downloadTournamentHistory } from '../controllers/tournamentHistory.controllers';
 import multer from 'multer';
@@ -113,6 +114,27 @@ router.post('/add-schoolgroup', addSchoolGroup);
 router.put('/edit-schoolgroup/:id', editSchoolGroup);
 router.delete('/delete-schoolgroup/:id', deleteSchoolGroup);
 router.get('/get-schoolgroups-all', getAllSchoolGroups);
+
+//Resource Library - General Rules
+router.get('/get-pdf/:schoolGroup_id', getPDFBySchoolGroupId);
+router.post('/upload-pdf', uploadMiddleware, uploadOrUpdatePDF);
+router.delete('/delete-pdf/:schoolGroup_id', deletePDF);
+
+//Resource Library - Q
+router.post('/questions', createQuestion);
+router.get('/questions/:QandA_id', getQuestion);
+router.delete('/questions/:QandA_id', deleteQuestion);
+router.put('/questions/:QandA_id/edit', editQuestion);
+router.get('/questions/bySchool/:schoolGroup_id', getQuestionsBySchoolGroupId);
+router.get('/questions/:Question/:schoolGroup_id', getQandAByQuestionAndSchoolGroupId);
+
+////Resource Library - A
+router.put('/questions/:QandA_id/answer', addAnswer);
+router.put('/questions/:QandA_id/edit-answer', editAnswer);
+router.get('/questions/schoolGroup/:schoolGroup_id/answered', getAnswersBySchoolGroupId);
+router.get('/questions/:QandA_id/answer', getAnswerByQandAId);
+router.put('/questions/edit-questions/:id', editQA);
+
 
 //Excel
 //router.get('/export-tournaments', exportTournamentsToExcel);

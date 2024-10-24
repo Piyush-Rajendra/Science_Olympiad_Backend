@@ -15,6 +15,14 @@ app.use(cors());
 app.use('/auth', authRoutes);
 app.use(dataRoutes)
 
+//Expand PDF Storage
+app.use(express.json({ limit: '500mb' }));
+app.use(express.urlencoded({ limit: '500mb', extended: true }));
+app.use((req, res, next) => {
+  req.setTimeout(600000); // 600 seconds
+  next();
+});
+
 // Create tables before starting the server
 const startServer = async () => {
   try {
