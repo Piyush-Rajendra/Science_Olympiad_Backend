@@ -453,6 +453,12 @@ export const registerEventSupervisor = async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'Email and username are required' });
   }
 
+  const [rows]: any = await pool.execute('SELECT * FROM eventsupervisor WHERE email = ?', [email]);
+
+  if (rows.length > 0) {
+    return res.status(409).json({ message: 'Email is already in use' }); // Conflict error
+  }
+
   // Generate a random password
   const randomPassword = crypto.randomBytes(8).toString('hex');
   const hashedPassword = await bcrypt.hash(randomPassword, 10);
