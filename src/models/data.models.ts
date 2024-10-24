@@ -30,10 +30,14 @@ export interface IEvent {
   scoreStatus: number; 
 }
 
-// models/eventHistory.model.ts
-export interface IEventHistory {
-  eventHistory_id: number;
-  tournament_id: number;
+// models/TournamentHistory.model.ts
+export interface ITournamentHistory {
+  tournamentHistory_id: number;
+  school_group_id: number;
+  excelMasterScore: string;
+  date: Date;
+  name: string;
+  division: string;
 }
 
 // models/scores.model.ts
@@ -74,6 +78,7 @@ export interface ISchool {
   school_group_id: number;
   name: String; 
   flight: String; 
+  tournament_id: number;
 }
 
 // models/team.model.ts
@@ -82,6 +87,7 @@ export interface ITeam {
   school_id: number;
   name: String; 
   unique_id: String; 
+  tournament_id: number;
 }
 
 // models/teamTimeBlock.model.ts
@@ -127,4 +133,13 @@ export interface IQandA {
   isAnswered: number;
   lastUpdated: Date;
   createdOn: Date;
+// models/RankedTeam.model.ts
+
+export interface RankedTeam {
+    teamName: string;
+    score: number | null;
+    tier: number;
+    TeamTimeBlock_ID: number;
+    unique_id: number; // Added to store the unique team ID
+    rank?: number; // Optional property for rank
 }

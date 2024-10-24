@@ -1,15 +1,21 @@
 import { Router } from 'express';
 import { addTournament, getAllTournaments, editTournament, deleteTournament, getTourneyById, getCurrentTournamentIds, getCurrentTournamentsByGroupId, exportTournamentScoresToExcel } from '../controllers/tournament.controller';
-import { updateEventStatus, getEventStatus, getEventSupervisorEventById, updateEventForEventSupervisor, removeEventFromEventSupervisor, addEvent, deleteEvent, editEvent, getAllEvents, getEventById, getEventsByEventSupervisorId, getEventsByTournamentId, addEventToEventSupervisor, getEventsByEventSupervisor, getEventsBySupervisorAndTournamentId, getTotalAbsentByEvent, getEventStatusByEventId, getScorePercentageByEventId, finalizeEventByEventId, getEventsByTournamentAndSupervisor, checkAndUpdateEventStatus } from '../controllers/event.controller';
-import { addSchool, deleteSchool, editSchool, getAllSchools, getSchoolById } from '../controllers/school.controller';
-import { addTeam, deleteTeam, editTeam, getAllTeams, getTeamById, getTeamsBySchoolId } from '../controllers/team.controllers';
+import { updateEventStatus, getEventStatus, getEventSupervisorEventById, updateEventForEventSupervisor, removeEventFromEventSupervisor, addEvent, deleteEvent, editEvent, getAllEvents, getEventById, getEventsByEventSupervisorId, getEventsByTournamentId, addEventToEventSupervisor, getEventsByEventSupervisor, getEventsBySupervisorAndTournamentId, getTotalAbsentByEvent, getEventStatusByEventId, getScorePercentageByEventId, finalizeEventByEventId, getEventsByTournamentAndSupervisor, checkAndUpdateEventStatus, getEventSupervisorIdByEmail } from '../controllers/event.controller';
+import { addSchool, deleteSchool, editSchool, getAllSchools, getSchoolById, getSchoolsByTournamentId } from '../controllers/school.controller';
+import { addTeam, deleteTeam, editTeam, getAllTeams, getTeamById, getTeamsBySchoolId, getTeamsByTournamentId } from '../controllers/team.controllers';
 import { addScore, deleteScore, editScore, getScoreById, getScoresByEventId, getScoresBySchoolGroupId, getScoresBySchoolId, getScoresByTeamId, getScoresByTournamentId } from '../controllers/score.controllers';
 import { updateTimeBlockStatus, getTimeBlockStatus, addTimeblocks, editTimeblock, deleteTimeblock, getTimeblocksByEventId, getTimeblocksByTournamentId} from '../controllers/timeblock.controller'
 import { addSchoolGroup, deleteSchoolGroup, editSchoolGroup, getAllSchoolGroups } from '../controllers/schoolgroups.controllers'
-import { getTeamTimeBlockWithSchoolById,getUniqueIdByTeamTimeBlockId, updateAttendStatus, getAttendStatus, updateTeamTimeBlockComment, getTeamTimeBlockComment, addTeamTimeBlock, deleteTeamTimeBlock, editTeamTimeBlock, getTeamTimeBlockById, getTeamTimeBlocksByEventId, getTeamTimeBlocksByTeamId, getTeamTimeBlocksByTimeBlockId } from '../controllers/teamtimeblock.controller';
 import { getPDFBySchoolGroupId, uploadOrUpdatePDF, uploadMiddleware, createQuestion, deleteQuestion, addAnswer, getQuestion, getAnswersBySchoolGroupId,editQuestion, editAnswer, getAnswerByQandAId, getQuestionsBySchoolGroupId, deletePDF, getQandAByQuestionAndSchoolGroupId, editQA } from '../controllers/library.controllers';
+import { getTeamTimeBlockWithSchoolById,getUniqueIdByTeamTimeBlockId, updateAttendStatus, getAttendStatus, updateTeamTimeBlockComment, getTeamTimeBlockComment, addTeamTimeBlock, deleteTeamTimeBlock, editTeamTimeBlock, getTeamTimeBlockById, getTeamTimeBlocksByEventId, getTeamTimeBlocksByTeamId, getTeamTimeBlocksByTimeBlockId, getTeamTimeBlocksByTimeBlockIdDetailed } from '../controllers/teamtimeblock.controller';
+import { getTournamentHistoryBySchoolGroup, addTournamentHistory, downloadTournamentHistory } from '../controllers/tournamentHistory.controllers';
+import multer from 'multer';
+
 
 const router = Router();
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 //Tournament
 router.post('/add-tournament', addTournament);
@@ -20,6 +26,10 @@ router.get('/get-tournament/:id', getTourneyById);
 router.get('/get-current-tournaments', getCurrentTournamentIds);
 router.get('/get-current-tournaments/:groupId', getCurrentTournamentsByGroupId)
 
+//Tournament History
+router.post('/tournaments/:tournamentId/add-history', addTournamentHistory);
+router.get('/get-tournament-history/:schoolgroupID', getTournamentHistoryBySchoolGroup);
+router.get('/tournament-history/:id/download', downloadTournamentHistory);
 
 //Event 
 router.post('/add-event', addEvent);
@@ -39,6 +49,7 @@ router.put('/edit-school/:id', editSchool);
 router.get('/get-schools', getAllSchools);
 router.delete('/delete-school/:id', deleteSchool);
 router.get('/get-school/:id', getSchoolById);
+router.get('/get-schools-by-tournament/:tournamentId', getSchoolsByTournamentId);
 
 //Team
 router.post('/add-team', addTeam);
@@ -47,6 +58,7 @@ router.get('/get-teams', getAllTeams);
 router.delete('/delete-team/:id', deleteTeam);
 router.put('/edit-team/:id', editTeam);
 router.get('/get-teams-by-school/:schoolId', getTeamsBySchoolId);
+router.get('/get-teams-by-tournament/:tournamentId', getTeamsByTournamentId);
 
 //Score
 router.post('/add-score', addScore);
@@ -70,6 +82,7 @@ router.put('/event/:event_id/status', updateEventStatus);
 router.get('/get-event-status/:eventId', getEventStatusByEventId); 
 router.get('/get-score-percentage/:eventId', getScorePercentageByEventId);
 router.put('/event/:eventId/finalize', finalizeEventByEventId);
+router.get('/get-eventSupervisor-id', getEventSupervisorIdByEmail);
 
 // Timeblock
 router.post('/add-timeblocks', addTimeblocks);
@@ -87,6 +100,7 @@ router.delete('/delete-team-timeblock/:id', deleteTeamTimeBlock);
 router.get('/get-team-timeblocks-by-id/:id', getTeamTimeBlockById);
 router.get('/get-team-timeblocks-by-team/:teamId', getTeamTimeBlocksByTeamId);
 router.get('/get-team-timeblocks-by-timeblock/:timeBlockId', getTeamTimeBlocksByTimeBlockId);
+router.get('/get-team-timeblocks-by-timeblock-detailed/:id', getTeamTimeBlocksByTimeBlockIdDetailed);
 router.get('/get-team-timeblocks-by-event/:eventId', getTeamTimeBlocksByEventId);
 router.get('/team-timeblock/:TeamTimeBlock_ID/comment', getTeamTimeBlockComment);
 router.put('/team-timeblock/:TeamTimeBlock_ID/comment', updateTeamTimeBlockComment);

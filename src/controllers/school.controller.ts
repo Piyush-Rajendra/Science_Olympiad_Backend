@@ -3,7 +3,7 @@ import pool from '../../config/db.config';
 import { ISchool } from '../models/data.models'; // Adjust the import path
 
 export const addSchool = async (req: Request, res: Response) => {
-    const { school_group_id, name, flight } = req.body;
+    const { school_group_id, name, flight, tournament_id } = req.body;
 
     // Validate required fields
     if ( !name || !flight) {
@@ -16,15 +16,17 @@ export const addSchool = async (req: Request, res: Response) => {
         school_group_id,
         name,
         flight,
+        tournament_id
     };
 
     try {
         const [result] = await pool.execute(
-            'INSERT INTO School (school_group_id, name, flight) VALUES (?, ?, ?)',
+            'INSERT INTO School (school_group_id, name, flight, tournament_id) VALUES (?, ?, ?, ?)',
             [
                 newSchool.school_group_id,
                 newSchool.name,
                 newSchool.flight,
+                newSchool.tournament_id,
             ]
         );
 
@@ -41,7 +43,8 @@ export const editSchool = async (req: Request, res: Response) => {
     const {
         school_group_id = null, // Optional field, set to null if not provided
         name = null, // Optional field, set to null if not provided
-        flight = null, // Optional field, set to null if not provided
+        flight = null,
+        tournament_id = null, // Optional field, set to null if not provided
     } = req.body;
 
     // Check if the school ID is valid
@@ -52,12 +55,13 @@ export const editSchool = async (req: Request, res: Response) => {
     try {
         const [result] = await pool.execute(
             `UPDATE School 
-             SET school_group_id = ?, name = ?, flight = ?
+             SET school_group_id = ?, name = ?, flight = ?, tournament_id = ?
              WHERE ID = ?`,
             [
                 school_group_id, // Can be null if not provided
                 name,             // Can be null if not provided
-                flight,           // Can be null if not provided
+                flight,
+                tournament_id,           // Can be null if not provided
                 school_id,       // Use the school ID from the URL
             ]
         );
@@ -131,5 +135,30 @@ export const getSchoolById = async (req: Request, res: Response) => {
     } catch (error) {
         console.error('Error retrieving school:', error);
         res.status(500).json({ message: 'Error retrieving school', error: error.message });
+    }
+};
+
+export const getSchoolsByTournamentId = async (req: Request, res: Response) => {
+    const tournament_id = parseInt(req.params.tournamentId); // Get tournament ID from the URL
+
+    // Validate tournament ID
+    if (isNaN(tournament_id)) {
+        return res.status(400).json({ message: 'Invalid tournament ID' });
+    }
+
+    try {
+        // Execute the query to retrieve schools by tournament ID
+        const [schools] = await pool.execute('SELECT * FROM School WHERE tournament_id = ?', [tournament_id]) as [ISchool[], any];
+
+        // Check if schools is an empty array
+        if (schools.length === 0) {
+            return res.status(404).json({ message: 'No schools found for this tournament ID' });
+        }
+
+        // Return the schools
+        res.status(200).json(schools);
+    } catch (error) {
+        console.error('Error retrieving schools by tournament ID:', error);
+        res.status(500).json({ message: 'Error retrieving schools', error: error.message });
     }
 };

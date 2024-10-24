@@ -5,8 +5,19 @@ import { ITeamTimeBlock, ITimeBlock } from '../models/data.models';
 // Add multiple timeblocks (based on how many timeblocks and breaks between)
 export const addTimeblocks = async (req: Request, res: Response) => {
     const { startTime, event_id, tournament_id, building, roomNumber, status, duration, breakTime, amount } = req.body;
+    /*
+    console.log("Start time: ", startTime);
+    console.log("Event_id: ", event_id);
+    console.log("Tournament_id: ", tournament_id);
+    console.log("Building: ", building);
+    console.log("Room Number: ", roomNumber);
+    console.log("Status: ", status);
+    console.log("Duration: ", duration);
+    console.log("Break Time: ", breakTime);
+    console.log("Amount: ", amount);*/
 
-    if (!startTime || !event_id || !tournament_id || !building || !roomNumber || !duration || !breakTime || !amount || !status) {
+
+    if (!startTime || !event_id || !tournament_id || !building || !roomNumber || !duration || !breakTime || !amount) {
         return res.status(400).json({ message: 'Missing information to add timeblock'});
     }
 
@@ -64,11 +75,23 @@ export const editTimeblock = async (req: Request, res: Response) => {
     }
 
     try {
+        
+        const [startHour, startMinute] = startTime.split(':').map(Number);
+        const [endHour, endMinute] = endTime.split(':').map(Number);
+
+        const startDate = new Date()
+        startDate.setHours(startHour, startMinute, 0, 0);
+        //const startInTime = startDate.getTime()
+
+        const endDate = new Date()
+        endDate.setHours(endHour, endMinute, 0, 0);
+        //const endInTime = endDate.getTime()
+        
 
         const [update] = await pool.execute(
             'UPDATE TimeBlock SET TimeBegin = ?, TimeEnd = ?, Event_ID = ?, Tournament_ID = ?, Building = ?, RoomNumber = ?, Status = ? WHERE TimeBlock_ID = ?', 
-            [startTime, endTime, event_id, tournament_id, building, roomNumber, id, status ]
-        )
+            [startDate, endDate, event_id, tournament_id, building, roomNumber, status, id]
+        );
 
         if ('affectedRows' in update) {
             if (update.affectedRows === 0) {
@@ -116,9 +139,7 @@ export const getTimeblocksByEventId = async (req: Request, res: Response) => {
 
     try {
         const [check]: any = await pool.execute('SELECT * FROM TimeBlock WHERE Event_ID = ?', [id]);
-        if (check.length === 0) {
-            return res.status(401).json({ message: 'Timeblock does not exist' });
-        }
+
         res.status(200).json(check);
     
     } catch (error) {

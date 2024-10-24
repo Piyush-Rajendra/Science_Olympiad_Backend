@@ -5,8 +5,10 @@ import pool from '../../config/db.config';
 import { IAdmin, IEventSupervisor, ISuperadmin, IUser} from '../models/auth.model';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
+require('dotenv').config();
 
-const secretKey = 'UGA';
+
+const secretKey = process.env.secretKey;
 
 // Super Admin 
 
@@ -170,22 +172,28 @@ export const registerAdmin = async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'Email and username are required' });
   }
 
-  // Generate a random password
-  const randomPassword = crypto.randomBytes(8).toString('hex');
-  const hashedPassword = await bcrypt.hash(randomPassword, 10);
-
-  const newAdmin: IAdmin = {
-    admin_id: 0,
-    school_group_id,
-    firstName,
-    lastName,
-    email,
-    username,
-    password: hashedPassword,
-    isTournamentDirector,
-  };
-
   try {
+    // Check if the email already exists
+    const [rows]: any = await pool.execute('SELECT * FROM admin WHERE email = ?', [email]);
+
+    if (rows.length > 0) {
+      return res.status(409).json({ message: 'Email is already in use' }); // Conflict error
+    }
+    // Generate a random password
+    const randomPassword = crypto.randomBytes(8).toString('hex');
+    const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+    const newAdmin: IAdmin = {
+      admin_id: 0,
+      school_group_id,
+      firstName,
+      lastName,
+      email,
+      username,
+      password: hashedPassword,
+      isTournamentDirector,
+    };
+
     // Insert the new admin into the database
     await pool.execute('INSERT INTO admin (school_group_id, firstName, lastName, email, username, password, isTournamentDirector) VALUES (?, ?, ?, ?, ?, ?, ?)', [
       newAdmin.school_group_id,
@@ -201,17 +209,17 @@ export const registerAdmin = async (req: Request, res: Response) => {
     const transporter = nodemailer.createTransport({
       service: 'Gmail',
       auth: {
-        user: 'ecinemabooking387@gmail.com',
-        pass: 'injgdluouhraowjt', // Use environment variable for security
+        user: 'epochscoringsystem@gmail.com',
+        pass: process.env.password, // Use environment variable for security
       },
     });
 
     const mailOptions = {
-      from: '"EPOCH SCORING SYSTEM" <ecinemabooking387@gmail.com>',
+      from: '"EPOCH SCORING SYSTEM" <epochscoringsystem@gmail.com>',
       to: newAdmin.email,
       subject: 'Profile Created - Change Your Password',
       text: `Dear ${newAdmin.firstName},\n\nYour admin profile has been created successfully. Please use the following temporary password to log in: ${randomPassword}\n\nPlease change your password immediately after logging in.\n\nThank you!`,
-    };
+    };  
 
     await transporter.sendMail(mailOptions);
 
@@ -248,8 +256,8 @@ export const forgotPassword = async (req: Request, res: Response) => {
     const transporter = nodemailer.createTransport({
       service: 'Gmail',
       auth: {
-        user: 'ecinemabooking387@gmail.com',
-        pass: "injgdluouhraowjt" // Use environment variable for security
+        user: 'epochscoringsystem@gmail.com',
+        pass: process.env.password, // Use environment variable for security
       },
     });
 
@@ -353,7 +361,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
 
     const token = jwt.sign({ id: admin.admin_id }, secretKey, { expiresIn: '1h' });
 
-    res.status(200).json({ message: 'Login successful', token, school_group_id: admin.school_group_id});
+    res.status(200).json({ message: 'Login successful', token, school_group_id: admin.school_group_id, isTournamentDirector: admin.isTournamentDirector});
   } catch (error) {
     res.status(500).json({ message: 'Error logging in', error });
   }
@@ -376,7 +384,7 @@ export const updateAdmin = async (req: Request, res: Response) => {
   }
 
   try {
-    const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+    // const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
     
     await pool.execute('UPDATE admin SET school_group_id = ?, firstName = ?, lastName = ?, email = ?, username = ?, password = ?, isTournamentDirector = ? WHERE admin_id = ?', [
       school_group_id,
@@ -384,7 +392,7 @@ export const updateAdmin = async (req: Request, res: Response) => {
       lastName,
       email,
       username,
-      hashedPassword,
+      password,
       isTournamentDirector,
       admin_id
     ]);
@@ -439,10 +447,16 @@ export const getAdminById = async (req: Request, res: Response) => {
 
 
 export const registerEventSupervisor = async (req: Request, res: Response) => {
-  const { school_group_id, email, username, firstName, lastName } = req.body;
+  const { school_group_id, email, username, firstName, lastName, tournament_id } = req.body;
 
   if (!email || !username) {
     return res.status(400).json({ message: 'Email and username are required' });
+  }
+
+  const [rows]: any = await pool.execute('SELECT * FROM eventsupervisor WHERE email = ?', [email]);
+
+  if (rows.length > 0) {
+    return res.status(409).json({ message: 'Email is already in use' }); // Conflict error
   }
 
   // Generate a random password
@@ -457,12 +471,13 @@ export const registerEventSupervisor = async (req: Request, res: Response) => {
     email,
     username,
     password: hashedPassword,
+    tournament_id,
   };
 
   try {
     // Insert the new event supervisor into the database
     await pool.execute(
-      'INSERT INTO eventsupervisor (school_group_id, email, username, password, firstName, lastName) VALUES (?, ?, ?, ?, ?, ?)', 
+      'INSERT INTO eventsupervisor (school_group_id, email, username, password, firstName, lastName, tournament_id) VALUES (?, ?, ?, ?, ?, ?, ?)', 
       [
         newEventSupervisor.school_group_id,
         newEventSupervisor.email,
@@ -470,6 +485,7 @@ export const registerEventSupervisor = async (req: Request, res: Response) => {
         newEventSupervisor.password,
         newEventSupervisor.firstName,
         newEventSupervisor.lastName,
+        newEventSupervisor.tournament_id,
       ]
     );
 
@@ -491,7 +507,7 @@ export const registerEventSupervisor = async (req: Request, res: Response) => {
 
     await transporter.sendMail(mailOptions);
 
-    res.status(201).json({ message: 'Event Supervisor registered successfully and email sent' });
+    res.status(201).json({ message: 'Event Supervisor registered successfully and email sent', eventSupervisor_id: newEventSupervisor.eventSupervisor_id });
   } catch (error) {
     res.status(500).json({ message: 'Error registering event supervisor', error });
   }
@@ -525,8 +541,8 @@ export const forgotPasswordES = async (req: Request, res: Response) => {
     const transporter = nodemailer.createTransport({
       service: 'Gmail',
       auth: {
-        user: 'ecinemabooking387@gmail.com',
-        pass: "injgdluouhraowjt" // Use environment variable for security
+        user: 'epochscoringsystem@gmail.com',
+        pass: process.env.password, // Use environment variable for security
       },
     });
 
@@ -662,15 +678,16 @@ export const updateEventSupervisor = async (req: Request, res: Response) => {
   }
 
   try {
-    const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+    // const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
     
-    await pool.execute('UPDATE eventsupervisor SET group_id = ?, email = ?, username = ?, password = ? WHERE eventSupervisor_id = ?', [
+    await pool.execute('UPDATE eventsupervisor SET school_group_id = ?, firstName = ?, lastName = ?, email = ?, username = ?, password = ? WHERE eventSupervisor_id = ?', [
       school_group_id,
       firstName,
       lastName,
       email,
       username,
-      hashedPassword
+      password,
+      eventSupervisor_id
     ]);
 
     res.status(200).json({ message: 'Event Supervisor updated successfully' });

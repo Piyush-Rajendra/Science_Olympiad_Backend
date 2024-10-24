@@ -19,7 +19,7 @@ export const addTeamTimeBlock = async (req: Request, res: Response) => {
         attend,
         comment: comment || '', // Default to empty string if comment is not provided
         tier: tier || 0, // Default tier to 0 if not provided
-        score: score || 0.0, // Default score to 0 if not provided
+        score: score || null, // Default score to 0 if not provided
     };
 
     try {
@@ -307,21 +307,24 @@ export const updateAttendStatus = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'Invalid value for Attend. Must be a boolean.' });
         }
 
-        // SQL query to update the Attend value
+        // Determine the Tier based on Attend value
+        const tier = attend ? 1 : 4;
+
+        // SQL query to update the Attend and Tier values
         const [result] = await pool.execute(
             `UPDATE TeamTimeBlock 
-             SET Attend = ? 
+             SET Attend = ?, Tier = ? 
              WHERE TeamTimeBlock_ID = ?`,
-            [attend, teamTimeBlockId]
+            [attend, tier, teamTimeBlockId]
         );
 
         if ((result as any).affectedRows === 0) {
             return res.status(404).json({ message: 'TeamTimeBlock not found' });
         }
 
-        res.json({ message: 'Attend status updated successfully' });
+        res.json({ message: 'Attend status and Tier updated successfully' });
     } catch (error) {
-        console.error('Error updating Attend status:', error);
+        console.error('Error updating Attend status and Tier:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
@@ -370,4 +373,48 @@ export const getTeamTimeBlockWithSchoolById = async (req: Request, res: Response
       res.status(500).json({ message: 'Internal server error' });
     }
   };
+
+  export const getTeamTimeBlocksByTimeBlockIdDetailed = async (req: Request, res: Response) => {
+    const timeBlockId = parseInt(req.params.id); // Get TimeBlock ID from the URL
+
+    if (isNaN(timeBlockId)) {
+        return res.status(400).json({ message: 'Invalid time block ID' });
+    }
+
+    try {
+        // Execute the select query
+        const [rows] = await pool.execute(
+            `
+            SELECT 
+                tt.TeamTimeBlock_ID,
+                tt.Attend,
+                tt.Comment,
+                tt.Tier,
+                tt.Score,
+                t.name AS team_name,
+                s.flight
+            FROM 
+                TeamTimeBlock tt
+            JOIN 
+                Team t ON tt.Team_ID = t.team_id
+            JOIN 
+                School s ON t.school_id = s.ID
+            WHERE 
+                tt.TimeBlock_ID = ?
+            `,
+            [timeBlockId]
+        );
+
+        // Check if any rows were returned
+        if (Array.isArray(rows) && rows.length === 0) {
+            return res.status(404).json({ message: 'No team time blocks found for this time block' });
+        }
+
+        // Return the found team time blocks
+        res.status(200).json(rows); // Return all found results
+    } catch (error) {
+        console.error('Error retrieving team time blocks:', error);
+        res.status(500).json({ message: 'Error retrieving team time blocks', error: error.message });
+    }
+};
 
