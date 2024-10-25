@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTeamTimeBlocksByTimeBlockIdDetailed = exports.getUniqueIdByTeamTimeBlockId = exports.getTeamTimeBlockWithSchoolById = exports.updateAttendStatus = exports.getAttendStatus = exports.updateTeamTimeBlockComment = exports.getTeamTimeBlockComment = exports.getTeamTimeBlocksByEventId = exports.getTeamTimeBlocksByTimeBlockId = exports.getTeamTimeBlocksByTeamId = exports.getTeamTimeBlockById = exports.deleteTeamTimeBlock = exports.editTeamTimeBlock = exports.addTeamTimeBlock = void 0;
+exports.getTeamTimeBlocksByTimeBlockIdDetailed = exports.getUniqueIdByTeamTimeBlockId = exports.getTeamTimeBlockWithSchoolById = exports.getTeamNameByTimeBlockId = exports.updateAttendStatus = exports.getAttendStatus = exports.updateTeamTimeBlockComment = exports.getTeamTimeBlockComment = exports.getTeamTimeBlocksByEventId = exports.getTeamTimeBlocksByTimeBlockId = exports.getTeamTimeBlocksByTeamId = exports.getTeamTimeBlockById = exports.deleteTeamTimeBlock = exports.editTeamTimeBlock = exports.addTeamTimeBlock = void 0;
 const db_config_1 = __importDefault(require("../config/db.config"));
 const addTeamTimeBlock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { timeBlock_id, team_id, event_id, attend, comment, tier, score } = req.body;
@@ -281,6 +281,27 @@ const updateAttendStatus = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.updateAttendStatus = updateAttendStatus;
+const getTeamNameByTimeBlockId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { teamTimeBlockId } = req.params;
+    try {
+        const [rows] = yield db_config_1.default.execute(`
+        SELECT t.name AS teamName
+        FROM TeamTimeBlock tt
+        JOIN Team t ON tt.Team_ID = t.team_id
+        WHERE tt.TeamTimeBlock_ID = ?
+      `, [teamTimeBlockId]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Team not found for the given TeamTimeBlock ID' });
+        }
+        const teamName = rows[0].teamName;
+        return res.status(200).json({ teamName });
+    }
+    catch (error) {
+        console.error('Error fetching team name:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+exports.getTeamNameByTimeBlockId = getTeamNameByTimeBlockId;
 const getTeamTimeBlockWithSchoolById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {

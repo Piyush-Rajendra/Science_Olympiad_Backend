@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.exportTournamentScoresToExcel = exports.getCurrentTournamentsByGroupId = exports.getCurrentTournamentIds = exports.getTourneyById = exports.deleteTournament = exports.editTournament = exports.getAllTournaments = exports.addTournament = void 0;
+exports.setCurrentTournament = exports.exportTournamentScoresToExcel = exports.getCurrentTournamentsByGroupIdManage = exports.getCurrentTournamentsByGroupId = exports.getCurrentTournamentIds = exports.getTourneyById = exports.deleteTournament = exports.editTournament = exports.getAllTournaments = exports.addTournament = void 0;
 const db_config_1 = __importDefault(require("../config/db.config"));
 const exceljs_1 = __importDefault(require("exceljs"));
 //import { RankedTeam } from '../models/data.models';
@@ -165,6 +165,20 @@ const getCurrentTournamentsByGroupId = (req, res) => __awaiter(void 0, void 0, v
     }
 });
 exports.getCurrentTournamentsByGroupId = getCurrentTournamentsByGroupId;
+const getCurrentTournamentsByGroupIdManage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const groupId = req.params.groupId; // Extract group_id from the URL
+    try {
+        // Query to get the tournaments for the specific group_id where isCurrent is true
+        const [tournaments] = yield db_config_1.default.execute('SELECT * FROM tournament WHERE group_id = ?', [groupId] // Pass the group_id to the query
+        );
+        res.status(200).json(tournaments);
+    }
+    catch (error) {
+        console.error('Error fetching current tournaments for group:', error);
+        res.status(500).json({ message: 'Error fetching current tournaments for group', error: error.message });
+    }
+});
+exports.getCurrentTournamentsByGroupIdManage = getCurrentTournamentsByGroupIdManage;
 const exportTournamentScoresToExcel = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const tournamentId = parseInt(req.params.tournamentId);
     if (!tournamentId) {
@@ -367,3 +381,32 @@ const exportTournamentScoresToExcel = (req, res) => __awaiter(void 0, void 0, vo
     }
 });
 exports.exportTournamentScoresToExcel = exportTournamentScoresToExcel;
+const setCurrentTournament = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const tournament_id = parseInt(req.params.id); // Get the tournament ID from the URL
+    if (isNaN(tournament_id)) {
+        return res.status(400).json({ message: 'Invalid tournament ID' });
+    }
+    try {
+        // Retrieve the group_id of the specified tournament
+        const [rows] = yield db_config_1.default.execute('SELECT group_id FROM tournament WHERE tournament_id = ?', [tournament_id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Tournament not found' });
+        }
+        const group_id = rows[0].group_id;
+        // Set isCurrent = false for all tournaments with the same group_id
+        yield db_config_1.default.execute('UPDATE tournament SET isCurrent = false WHERE group_id = ?', [group_id]);
+        // Set isCurrent = true for the specified tournament
+        const [result] = yield db_config_1.default.execute('UPDATE tournament SET isCurrent = true WHERE tournament_id = ?', [tournament_id]);
+        // Check if any rows were affected (meaning the tournament was updated)
+        const affectedRows = result.affectedRows;
+        if (affectedRows === 0) {
+            return res.status(404).json({ message: 'Tournament not found' });
+        }
+        res.status(200).json({ message: 'Tournament set as current successfully' });
+    }
+    catch (error) {
+        console.error('Error setting current tournament:', error);
+        res.status(500).json({ message: 'Error setting current tournament', error: error.message });
+    }
+});
+exports.setCurrentTournament = setCurrentTournament;

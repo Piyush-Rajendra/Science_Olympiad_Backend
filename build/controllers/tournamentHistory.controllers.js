@@ -19,7 +19,7 @@ const db_config_1 = __importDefault(require("../config/db.config"));
 const addTournamentHistory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     const tournamentId = parseInt(req.params.tournamentId);
-    const schoolGroupId = req.body.school_group_id; // Ensure this is passed in the request
+    const schoolGroupId = req.params.groupID; // Updated to match the route parameter
     const tournamentName = req.body.name; // Ensure the tournament name is passed in the request
     const division = req.body.division; // Ensure the division is passed in the request
     if (!tournamentId || !schoolGroupId || !tournamentName || !division) {
