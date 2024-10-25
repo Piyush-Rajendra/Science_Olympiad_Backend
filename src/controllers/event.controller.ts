@@ -12,15 +12,15 @@ export const addEvent = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Tournament ID, event name, and scoring algorithm are required' });
     }
   
-    // Create the new event object
+    // Create the new event object, replacing undefined values with null
     const newEvent: IEvent = {
       event_id: 0, // Auto-increment handled by the database
       name,
       tournament_id,
       scoringAlg,
-      description, // Use provided description or default to empty string
-      status,
-      scoreStatus,
+      description: description ?? null,
+      status: status ?? null,
+      scoreStatus: scoreStatus ?? null,
     };
   
     try {
@@ -37,12 +37,13 @@ export const addEvent = async (req: Request, res: Response) => {
       );
   
       // Return the newly created event ID
-      res.status(201).json({ message: 'Event added successfully'});
+      res.status(201).json({ message: 'Event added successfully' });
     } catch (error) {
       console.error('Error adding event:', error);
       res.status(500).json({ message: 'Error adding event', error: error.message });
     }
   };
+  
   
   // Edit Event by ID
   export const editEvent = async (req: Request, res: Response) => {
