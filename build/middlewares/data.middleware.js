@@ -65,7 +65,7 @@ const createDataTables = () => __awaiter(void 0, void 0, void 0, function* () {
           username VARCHAR(255) NOT NULL,
           password VARCHAR(255) NOT NULL,
           FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE,
-          FOREIGN KEY (tournament_id) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
+          FOREIGN KEY (tournament_id) REFERENCES tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
         )
     `);
         // Create School table
@@ -77,7 +77,7 @@ const createDataTables = () => __awaiter(void 0, void 0, void 0, function* () {
         name VARCHAR(255) NOT NULL,
         flight VARCHAR(50) NOT NULL,
         FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (tournament_id) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (tournament_id) REFERENCES tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
     `);
         //Create Team Table
@@ -89,7 +89,7 @@ const createDataTables = () => __awaiter(void 0, void 0, void 0, function* () {
         name VARCHAR(255) NOT NULL,
         unique_id VARCHAR(100) NOT NULL,
         FOREIGN KEY (school_id) REFERENCES School(ID) ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY (tournament_id) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY (tournament_id) REFERENCES tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
         `);
         // Create Event table
@@ -102,7 +102,7 @@ const createDataTables = () => __awaiter(void 0, void 0, void 0, function* () {
             description TEXT,
             status INT,
             scoreStatus INT DEFAULT 0,
-            FOREIGN KEY (tournament_id) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
+            FOREIGN KEY (tournament_id) REFERENCES tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
     `);
         //Create TimeBlock Table
@@ -116,7 +116,7 @@ const createDataTables = () => __awaiter(void 0, void 0, void 0, function* () {
             Building TEXT,
             RoomNumber INT,
             Status INT,
-            FOREIGN KEY (Tournament_ID) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE,
+            FOREIGN KEY (Tournament_ID) REFERENCES tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE,
             FOREIGN KEY (Event_ID) REFERENCES Event(event_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
     `);
@@ -149,7 +149,7 @@ const createDataTables = () => __awaiter(void 0, void 0, void 0, function* () {
             is_reviewed BOOLEAN NOT NULL DEFAULT FALSE,
             FOREIGN KEY (event_id) REFERENCES Event(event_id) ON DELETE CASCADE ON UPDATE CASCADE,
             FOREIGN KEY (school_id) REFERENCES School(ID) ON DELETE CASCADE ON UPDATE CASCADE,
-            FOREIGN KEY (tournament_id) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE,
+            FOREIGN KEY (tournament_id) REFERENCES tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE,
             FOREIGN KEY (school_group_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE,
             FOREIGN KEY (team_id) REFERENCES Team(team_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
@@ -195,7 +195,7 @@ const createDataTables = () => __awaiter(void 0, void 0, void 0, function* () {
             createdOn DATETIME NOT NULL,
             tournament_id INT,
             FOREIGN KEY (schoolGroup_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE,
-            FOREIGN KEY (tournament_id) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
+            FOREIGN KEY (tournament_id) REFERENCES tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
       `);
         console.log('Tables created successfully');
