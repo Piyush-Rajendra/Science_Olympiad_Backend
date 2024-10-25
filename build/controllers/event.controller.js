@@ -20,15 +20,15 @@ const addEvent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!name || !tournament_id || !scoringAlg) {
         return res.status(400).json({ message: 'Tournament ID, event name, and scoring algorithm are required' });
     }
-    // Create the new event object
+    // Create the new event object, replacing undefined values with null
     const newEvent = {
         event_id: 0, // Auto-increment handled by the database
         name,
         tournament_id,
         scoringAlg,
-        description, // Use provided description or default to empty string
-        status,
-        scoreStatus,
+        description: description !== null && description !== void 0 ? description : null,
+        status: status !== null && status !== void 0 ? status : null,
+        scoreStatus: scoreStatus !== null && scoreStatus !== void 0 ? scoreStatus : null,
     };
     try {
         const [result] = yield db_config_1.default.execute('INSERT INTO Event (name, tournament_id, scoringAlg, description, status, scoreStatus) VALUES (?, ?, ?, ?, ?, ?)', [
