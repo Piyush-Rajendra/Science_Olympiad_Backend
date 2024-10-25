@@ -18,17 +18,23 @@ const addTeam = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { school_id, name, unique_id, tournament_id } = req.body;
     // Validate required fields
     if (!school_id || !name || !unique_id || !tournament_id) {
-        return res.status(400).json({ message: 'School ID, team name, and unique ID are required' });
+        return res.status(400).json({ message: 'School ID, team name, unique ID, and tournament ID are required' });
     }
-    // Create the new team object
-    const newTeam = {
-        ID: 0, // Auto-increment handled by the database
-        school_id,
-        name,
-        unique_id,
-        tournament_id,
-    };
     try {
+        // Check if a team with the same unique_id already exists
+        const [existingTeam] = yield db_config_1.default.execute('SELECT * FROM Team WHERE unique_id = ? AND tournament_id = ?', [unique_id, tournament_id]);
+        if (existingTeam.length > 0) {
+            return res.status(409).json({ message: 'A team with this unique ID already exists in the tournament' });
+        }
+        // Create the new team object
+        const newTeam = {
+            ID: 0, // Auto-increment handled by the database
+            school_id,
+            name,
+            unique_id,
+            tournament_id,
+        };
+        // Insert the new team
         const [result] = yield db_config_1.default.execute('INSERT INTO Team (school_id, name, unique_id, tournament_id) VALUES (?, ?, ?, ?)', [
             newTeam.school_id,
             newTeam.name,

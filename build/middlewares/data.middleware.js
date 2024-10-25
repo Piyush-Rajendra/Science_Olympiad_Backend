@@ -39,7 +39,7 @@ const createDataTables = () => __awaiter(void 0, void 0, void 0, function* () {
     `);
         // Create Tournament table
         yield db_config_1.default.execute(`
-        CREATE TABLE IF NOT EXISTS Tournament (
+        CREATE TABLE IF NOT EXISTS tournament (
             tournament_id INT AUTO_INCREMENT PRIMARY KEY,
             group_id INT NOT NULL,
             isCurrent BOOLEAN NOT NULL DEFAULT FALSE,
@@ -193,7 +193,9 @@ const createDataTables = () => __awaiter(void 0, void 0, void 0, function* () {
             isAnswered TINYINT(1) NOT NULL,
             lastUpdated DATETIME NOT NULL,
             createdOn DATETIME NOT NULL,
-            FOREIGN KEY (schoolGroup_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE
+            tournament_id INT,
+            FOREIGN KEY (schoolGroup_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE,
+            FOREIGN KEY (tournament_id) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
       `);
         console.log('Tables created successfully');

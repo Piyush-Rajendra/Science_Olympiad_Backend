@@ -26,8 +26,10 @@ router.delete('/delete-tournament/:id', tournament_controller_1.deleteTournament
 router.get('/get-tournament/:id', tournament_controller_1.getTourneyById);
 router.get('/get-current-tournaments', tournament_controller_1.getCurrentTournamentIds);
 router.get('/get-current-tournaments/:groupId', tournament_controller_1.getCurrentTournamentsByGroupId);
+router.get('/get-current-tournamentsManage/:groupId', tournament_controller_1.getCurrentTournamentsByGroupIdManage);
+router.put('/setTournamentToCurrent/:id', tournament_controller_1.setCurrentTournament);
 //Tournament History
-router.post('/tournaments/:tournamentId/add-history', tournamentHistory_controllers_1.addTournamentHistory);
+router.post('/tournaments/:tournamentId/add-history/:groupID', tournamentHistory_controllers_1.addTournamentHistory);
 router.get('/get-tournament-history/:schoolgroupID', tournamentHistory_controllers_1.getTournamentHistoryBySchoolGroup);
 router.get('/tournament-history/:id/download', tournamentHistory_controllers_1.downloadTournamentHistory);
 //Event 
@@ -102,6 +104,7 @@ router.get('/teamtimeblock/:teamTimeBlockId/attend', teamtimeblock_controller_1.
 router.put('/teamtimeblock/:teamTimeBlockId/attend', teamtimeblock_controller_1.updateAttendStatus);
 router.get('/team-timeblocks-get-school-name/:id', teamtimeblock_controller_1.getTeamTimeBlockWithSchoolById);
 router.get('/team-timeblocks/:id/unique-id', teamtimeblock_controller_1.getUniqueIdByTeamTimeBlockId);
+router.get('/teamblock/:teamTimeBlockId', teamtimeblock_controller_1.getTeamNameByTimeBlockId);
 // School Groups
 router.post('/add-schoolgroup', schoolgroups_controllers_1.addSchoolGroup);
 router.put('/edit-schoolgroup/:id', schoolgroups_controllers_1.editSchoolGroup);

@@ -86,7 +86,7 @@ exports.getPDFBySchoolGroupId = getPDFBySchoolGroupId;
 exports.uploadMiddleware = upload.single('pdf');
 // Create a question
 const createQuestion = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { schoolGroup_id, Question, Answer } = req.body;
+    const { schoolGroup_id, Question, Answer, tournament_id } = req.body;
     // Validate input
     if (!schoolGroup_id || !Question) {
         return res.status(400).json({ message: 'schoolGroup_id and Question are required' });
@@ -94,7 +94,7 @@ const createQuestion = (req, res) => __awaiter(void 0, void 0, void 0, function*
     try {
         const createdOn = new Date();
         const isAnswered = Answer ? 1 : 0; // Set isAnswered to 1 if an answer is provided, otherwise 0
-        const [result] = yield db_config_1.default.execute('INSERT INTO QandA (schoolGroup_id, Question, Answer, isAnswered, createdOn, lastUpdated) VALUES (?, ?, ?, ?, ?, ?)', [schoolGroup_id, Question, Answer || null, isAnswered, createdOn, createdOn]);
+        const [result] = yield db_config_1.default.execute('INSERT INTO QandA (schoolGroup_id, Question, Answer, isAnswered, createdOn, lastUpdated, tournament_id) VALUES (?, ?, ?, ?, ?, ?, ?)', [schoolGroup_id, Question, Answer || null, isAnswered, createdOn, createdOn, tournament_id]);
         res.status(201).json({
             message: 'Question created successfully',
             QandA_id: result.insertId
