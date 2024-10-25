@@ -7,7 +7,7 @@ import { addScore, deleteScore, editScore, getScoreById, getScoresByEventId, get
 import { updateTimeBlockStatus, getTimeBlockStatus, addTimeblocks, editTimeblock, deleteTimeblock, getTimeblocksByEventId, getTimeblocksByTournamentId} from '../controllers/timeblock.controller'
 import { addSchoolGroup, deleteSchoolGroup, editSchoolGroup, getAllSchoolGroups } from '../controllers/schoolgroups.controllers'
 import { getPDFBySchoolGroupId, uploadOrUpdatePDF, uploadMiddleware, createQuestion, deleteQuestion, addAnswer, getQuestion, getAnswersBySchoolGroupId,editQuestion, editAnswer, getAnswerByQandAId, getQuestionsBySchoolGroupId, deletePDF, getQandAByQuestionAndSchoolGroupId, editQA } from '../controllers/library.controllers';
-import { getTeamTimeBlockWithSchoolById,getUniqueIdByTeamTimeBlockId, updateAttendStatus, getAttendStatus, updateTeamTimeBlockComment, getTeamTimeBlockComment, addTeamTimeBlock, deleteTeamTimeBlock, editTeamTimeBlock, getTeamTimeBlockById, getTeamTimeBlocksByEventId, getTeamTimeBlocksByTeamId, getTeamTimeBlocksByTimeBlockId, getTeamTimeBlocksByTimeBlockIdDetailed } from '../controllers/teamtimeblock.controller';
+import { getTeamTimeBlockWithSchoolById,getUniqueIdByTeamTimeBlockId, updateAttendStatus, getAttendStatus, updateTeamTimeBlockComment, getTeamTimeBlockComment, addTeamTimeBlock, deleteTeamTimeBlock, editTeamTimeBlock, getTeamTimeBlockById, getTeamTimeBlocksByEventId, getTeamTimeBlocksByTeamId, getTeamTimeBlocksByTimeBlockId, getTeamTimeBlocksByTimeBlockIdDetailed, getTeamNameByTimeBlockId } from '../controllers/teamtimeblock.controller';
 import { getTournamentHistoryBySchoolGroup, addTournamentHistory, downloadTournamentHistory } from '../controllers/tournamentHistory.controllers';
 import multer from 'multer';
 
@@ -109,7 +109,7 @@ router.get('/teamtimeblock/:teamTimeBlockId/attend', getAttendStatus);
 router.put('/teamtimeblock/:teamTimeBlockId/attend', updateAttendStatus);
 router.get('/team-timeblocks-get-school-name/:id', getTeamTimeBlockWithSchoolById);
 router.get('/team-timeblocks/:id/unique-id', getUniqueIdByTeamTimeBlockId);
-
+router.get('/teamblock/:teamTimeBlockId', getTeamNameByTimeBlockId);
 // School Groups
 router.post('/add-schoolgroup', addSchoolGroup);
 router.put('/edit-schoolgroup/:id', editSchoolGroup);
