@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { addTournament, getAllTournaments, editTournament, deleteTournament, getTourneyById, getCurrentTournamentIds, getCurrentTournamentsByGroupId, exportTournamentScoresToExcel } from '../controllers/tournament.controller';
+import { addTournament, getAllTournaments, editTournament, deleteTournament, getTourneyById, getCurrentTournamentIds, getCurrentTournamentsByGroupId, exportTournamentScoresToExcel, getCurrentTournamentsByGroupIdManage } from '../controllers/tournament.controller';
 import { updateEventStatus, getEventStatus, getEventSupervisorEventById, updateEventForEventSupervisor, removeEventFromEventSupervisor, addEvent, deleteEvent, editEvent, getAllEvents, getEventById, getEventsByEventSupervisorId, getEventsByTournamentId, addEventToEventSupervisor, getEventsByEventSupervisor, getEventsBySupervisorAndTournamentId, getTotalAbsentByEvent, getEventStatusByEventId, getScorePercentageByEventId, finalizeEventByEventId, getEventsByTournamentAndSupervisor, checkAndUpdateEventStatus, getEventSupervisorIdByEmail } from '../controllers/event.controller';
 import { addSchool, deleteSchool, editSchool, getAllSchools, getSchoolById, getSchoolsByTournamentId } from '../controllers/school.controller';
-import { addTeam, deleteTeam, editTeam, getAllTeams, getTeamById, getTeamsBySchoolId, getTeamsByTournamentId } from '../controllers/team.controllers';
+import { addTeam, deleteTeam, editTeam, getAllTeams, getTeamById, getTeamsBySchoolId, getTeamsByTournamentId,  } from '../controllers/team.controllers';
 import { addScore, deleteScore, editScore, getScoreById, getScoresByEventId, getScoresBySchoolGroupId, getScoresBySchoolId, getScoresByTeamId, getScoresByTournamentId } from '../controllers/score.controllers';
 import { updateTimeBlockStatus, getTimeBlockStatus, addTimeblocks, editTimeblock, deleteTimeblock, getTimeblocksByEventId, getTimeblocksByTournamentId} from '../controllers/timeblock.controller'
 import { addSchoolGroup, deleteSchoolGroup, editSchoolGroup, getAllSchoolGroups } from '../controllers/schoolgroups.controllers'
@@ -25,6 +25,7 @@ router.delete('/delete-tournament/:id', deleteTournament);
 router.get('/get-tournament/:id', getTourneyById);
 router.get('/get-current-tournaments', getCurrentTournamentIds);
 router.get('/get-current-tournaments/:groupId', getCurrentTournamentsByGroupId)
+router.get('/get-current-tournamentsManage/:groupId', getCurrentTournamentsByGroupIdManage)
 
 //Tournament History
 router.post('/tournaments/:tournamentId/add-history/:groupID', addTournamentHistory);
