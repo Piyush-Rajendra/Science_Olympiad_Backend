@@ -227,7 +227,7 @@ const forgotPassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
         // Generate token for password reset
         const token = jsonwebtoken_1.default.sign({ email: user.email }, secretKey, { expiresIn: '1h' });
         // Create reset password URL
-        const resetUrl = `https://epoch-scoring-system-c1d945cee420.herokuapp.com/change-new-password?token=${token}`;
+        const resetUrl = `https://epoch-scoring-system-d18v4l00c-epoch-scoring-systems-projects.vercel.app/change-new-password?token=${token}`;
         // Send reset password email
         const transporter = nodemailer_1.default.createTransport({
             service: 'Gmail',
