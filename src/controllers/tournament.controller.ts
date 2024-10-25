@@ -29,7 +29,7 @@ export const addTournament = async (req: Request, res: Response) => {
   
     try {
       const [result] = await pool.execute(
-        'INSERT INTO tournament (name, division, group_id, isCurrent, NumOfTimeBlocks, location, description, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO tournament(name, division, group_id, isCurrent, NumOfTimeBlocks, location, description, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
         [
           newTournament.name,
           newTournament.division,
