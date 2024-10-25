@@ -138,7 +138,7 @@ export const getAllTournaments = async (req: Request, res: Response) => {
 
     try {
         // Execute the select query
-        const [tournaments] = await pool.execute('SELECT * FROM Tournament WHERE tournament_id = ?', [tournamentId]) as [Event[], any];
+        const [tournaments] = await pool.execute('SELECT * FROM tournament WHERE tournament_id = ?', [tournamentId]) as [Event[], any];
 
         // Check if the school was found
         if (tournaments.length === 0) {

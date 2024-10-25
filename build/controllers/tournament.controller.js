@@ -35,7 +35,7 @@ const addTournament = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         description: description || "", // Use the description from the request body or default to empty
     };
     try {
-        const [result] = yield db_config_1.default.execute('INSERT INTO tournament (name, division, group_id, isCurrent, NumOfTimeBlocks, location, description, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [
+        const [result] = yield db_config_1.default.execute('INSERT INTO tournament(name, division, group_id, isCurrent, NumOfTimeBlocks, location, description, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [
             newTournament.name,
             newTournament.division,
             newTournament.group_id,
@@ -126,7 +126,7 @@ const getTourneyById = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
     try {
         // Execute the select query
-        const [tournaments] = yield db_config_1.default.execute('SELECT * FROM Tournament WHERE tournament_id = ?', [tournamentId]);
+        const [tournaments] = yield db_config_1.default.execute('SELECT * FROM tournament WHERE tournament_id = ?', [tournamentId]);
         // Check if the school was found
         if (tournaments.length === 0) {
             return res.status(404).json({ message: 'Tournament not found' });
