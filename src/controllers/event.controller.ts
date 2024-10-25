@@ -18,7 +18,7 @@ export const addEvent = async (req: Request, res: Response) => {
       name,
       tournament_id,
       scoringAlg,
-      description: description || "", // Use provided description or default to empty string
+      description, // Use provided description or default to empty string
       status,
       scoreStatus,
     };

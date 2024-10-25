@@ -26,7 +26,7 @@ const addEvent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         name,
         tournament_id,
         scoringAlg,
-        description: description || "", // Use provided description or default to empty string
+        description, // Use provided description or default to empty string
         status,
         scoreStatus,
     };
