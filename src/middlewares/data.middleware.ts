@@ -27,7 +27,7 @@ export const createDataTables = async () => {
     
     // Create Tournament table
     await pool.execute(`
-        CREATE TABLE IF NOT EXISTS Tournament (
+        CREATE TABLE IF NOT EXISTS tournament (
             tournament_id INT AUTO_INCREMENT PRIMARY KEY,
             group_id INT NOT NULL,
             isCurrent BOOLEAN NOT NULL DEFAULT FALSE,
