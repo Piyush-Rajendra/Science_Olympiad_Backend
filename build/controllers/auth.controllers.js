@@ -21,22 +21,30 @@ const crypto_1 = __importDefault(require("crypto"));
 require('dotenv').config();
 const secretKey = process.env.secretKey;
 // Super Admin 
+// Super Admin 
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, username, password } = req.body;
     if (!username || !password) {
-        return res.status(400).json({ message: 'Username and password are required' });
+        return res.status(400).json({ message: 'Username, password are required' });
     }
-    const hashedPassword = yield bcrypt_1.default.hash(password, 10);
-    const newUser = {
-        _superadmin_id: 0,
-        name,
-        username,
-        password: hashedPassword,
-        lastUpdated: new Date(),
-        createdOn: new Date(),
-    };
     try {
-        const [result] = yield db_config_1.default.execute('INSERT INTO superadmin (name, username, password, lastUpdated, createdOn) VALUES (?, ?, ?, ?, ?)', [
+        // Check if the email or username already exists
+        const [rows] = yield db_config_1.default.execute('SELECT username FROM superadmin WHERE username = ? ', [username]); // Explicitly casting the result to an array of rows
+        if (rows.length > 0) {
+            return res.status(409).json({ message: 'Username  already exists' });
+        }
+        // Hash the password
+        const hashedPassword = yield bcrypt_1.default.hash(password, 10);
+        const newUser = {
+            _superadmin_id: 0,
+            name,
+            username,
+            password: hashedPassword,
+            lastUpdated: new Date(),
+            createdOn: new Date(),
+        };
+        // Insert the new super admin into the database
+        yield db_config_1.default.execute('INSERT INTO superadmin (name, username, password, lastUpdated, createdOn) VALUES (?, ?, ?, ?, ?, ?)', [
             newUser.name,
             newUser.username,
             newUser.password,
