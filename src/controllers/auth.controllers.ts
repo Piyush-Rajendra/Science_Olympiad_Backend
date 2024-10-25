@@ -250,7 +250,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
     const token = jwt.sign({ email: user.email }, secretKey, { expiresIn: '1h' });
 
     // Create reset password URL
-    const resetUrl = `http://localhost:3001/change-new-password?token=${token}`;
+    const resetUrl = `https://epoch-scoring-system-c1d945cee420.herokuapp.com/change-new-password?token=${token}`;
 
     // Send reset password email
     const transporter = nodemailer.createTransport({
