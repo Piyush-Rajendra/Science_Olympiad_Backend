@@ -193,7 +193,9 @@ export const createDataTables = async () => {
             isAnswered TINYINT(1) NOT NULL,
             lastUpdated DATETIME NOT NULL,
             createdOn DATETIME NOT NULL,
-            FOREIGN KEY (schoolGroup_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE
+            tournament_id INT,
+            FOREIGN KEY (schoolGroup_id) REFERENCES SchoolGroup(school_group_id) ON DELETE CASCADE ON UPDATE CASCADE,
+            FOREIGN KEY (tournament_id) REFERENCES Tournament(tournament_id) ON DELETE CASCADE ON UPDATE CASCADE
         );
       `);
 
