@@ -166,8 +166,6 @@ export const getCurrentTournamentIds = async (req: Request, res: Response) => {
     }
   };
 
-  
-
   export const getCurrentTournamentsByGroupId = async (req: Request, res: Response) => {
     const groupId = req.params.groupId; // Extract group_id from the URL
   
@@ -175,6 +173,24 @@ export const getCurrentTournamentIds = async (req: Request, res: Response) => {
       // Query to get the tournaments for the specific group_id where isCurrent is true
       const [tournaments] = await pool.execute(
         'SELECT * FROM tournament WHERE group_id = ? AND isCurrent = true',
+        [groupId] // Pass the group_id to the query
+      );
+  
+      res.status(200).json(tournaments);
+    } catch (error) {
+      console.error('Error fetching current tournaments for group:', error);
+      res.status(500).json({ message: 'Error fetching current tournaments for group', error: error.message });
+    }
+  };
+
+
+export const getCurrentTournamentsByGroupIdManage = async (req: Request, res: Response) => {
+    const groupId = req.params.groupId; // Extract group_id from the URL
+  
+    try {
+      // Query to get the tournaments for the specific group_id where isCurrent is true
+      const [tournaments] = await pool.execute(
+        'SELECT * FROM tournament WHERE group_id = ?',
         [groupId] // Pass the group_id to the query
       );
   
@@ -198,6 +214,7 @@ export const getCurrentTournamentIds = async (req: Request, res: Response) => {
     flightRankB: number; 
     comment: String;
 }
+
 
 export const exportTournamentScoresToExcel = async (req: Request, res: Response) => {
     const tournamentId = parseInt(req.params.tournamentId);
@@ -434,3 +451,44 @@ export const exportTournamentScoresToExcel = async (req: Request, res: Response)
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
+export const setCurrentTournament = async (req: Request, res: Response) => {
+    const tournament_id = parseInt(req.params.id); // Get the tournament ID from the URL
+  
+    if (isNaN(tournament_id)) {
+      return res.status(400).json({ message: 'Invalid tournament ID' });
+    }
+  
+    try {
+      // Retrieve the group_id of the specified tournament
+      const [rows] = await pool.execute('SELECT group_id FROM tournament WHERE tournament_id = ?', [tournament_id]);
+      
+      if ((rows as any[]).length === 0) {
+        return res.status(404).json({ message: 'Tournament not found' });
+      }
+  
+      const group_id = (rows as any[])[0].group_id;
+  
+      // Set isCurrent = false for all tournaments with the same group_id
+      await pool.execute('UPDATE tournament SET isCurrent = false WHERE group_id = ?', [group_id]);
+  
+      // Set isCurrent = true for the specified tournament
+      const [result] = await pool.execute(
+        'UPDATE tournament SET isCurrent = true WHERE tournament_id = ?',
+        [tournament_id]
+      );
+  
+      // Check if any rows were affected (meaning the tournament was updated)
+      const affectedRows = (result as { affectedRows: number }).affectedRows;
+  
+      if (affectedRows === 0) {
+        return res.status(404).json({ message: 'Tournament not found' });
+      }
+  
+      res.status(200).json({ message: 'Tournament set as current successfully' });
+    } catch (error) {
+      console.error('Error setting current tournament:', error);
+      res.status(500).json({ message: 'Error setting current tournament', error: error.message });
+    }
+  };
+  
