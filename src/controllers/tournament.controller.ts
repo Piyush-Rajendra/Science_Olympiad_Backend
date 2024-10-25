@@ -166,8 +166,6 @@ export const getCurrentTournamentIds = async (req: Request, res: Response) => {
     }
   };
 
-  
-
   export const getCurrentTournamentsByGroupId = async (req: Request, res: Response) => {
     const groupId = req.params.groupId; // Extract group_id from the URL
   
@@ -175,6 +173,24 @@ export const getCurrentTournamentIds = async (req: Request, res: Response) => {
       // Query to get the tournaments for the specific group_id where isCurrent is true
       const [tournaments] = await pool.execute(
         'SELECT * FROM tournament WHERE group_id = ? AND isCurrent = true',
+        [groupId] // Pass the group_id to the query
+      );
+  
+      res.status(200).json(tournaments);
+    } catch (error) {
+      console.error('Error fetching current tournaments for group:', error);
+      res.status(500).json({ message: 'Error fetching current tournaments for group', error: error.message });
+    }
+  };
+
+
+export const getCurrentTournamentsByGroupIdManage = async (req: Request, res: Response) => {
+    const groupId = req.params.groupId; // Extract group_id from the URL
+  
+    try {
+      // Query to get the tournaments for the specific group_id where isCurrent is true
+      const [tournaments] = await pool.execute(
+        'SELECT * FROM tournament WHERE group_id = ?',
         [groupId] // Pass the group_id to the query
       );
   
@@ -198,6 +214,7 @@ export const getCurrentTournamentIds = async (req: Request, res: Response) => {
     flightRankB: number; 
     comment: String;
 }
+
 
 export const exportTournamentScoresToExcel = async (req: Request, res: Response) => {
     const tournamentId = parseInt(req.params.tournamentId);
