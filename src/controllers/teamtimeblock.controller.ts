@@ -329,6 +329,29 @@ export const updateAttendStatus = async (req: Request, res: Response) => {
     }
 };
 
+export const getTeamNameByTimeBlockId = async (req, res) => {
+    const { teamTimeBlockId } = req.params;
+  
+    try {
+      const [rows] = await pool.execute(`
+        SELECT t.name AS teamName
+        FROM TeamTimeBlock tt
+        JOIN Team t ON tt.Team_ID = t.team_id
+        WHERE tt.TeamTimeBlock_ID = ?
+      `, [teamTimeBlockId]);
+  
+      if ((rows as any).length === 0) {
+        return res.status(404).json({ message: 'Team not found for the given TeamTimeBlock ID' });
+      }
+  
+      const teamName = rows[0].teamName;
+      return res.status(200).json({ teamName });
+    } catch (error) {
+      console.error('Error fetching team name:', error);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+  };
+
 export const getTeamTimeBlockWithSchoolById = async (req: Request, res: Response) => {
     const { id } = req.params;
   
