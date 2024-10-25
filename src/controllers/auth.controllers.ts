@@ -265,6 +265,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
     // Generate token for password reset
     const token = jwt.sign({ email: user.email }, secretKey, { expiresIn: '1h' });
+    
 
     // Create reset password URL
     const resetUrl = `https://epoch-scoring-system-d18v4l00c-epoch-scoring-systems-projects.vercel.app/change-new-password?token=${token}`;
