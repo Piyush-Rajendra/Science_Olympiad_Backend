@@ -44,7 +44,7 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             createdOn: new Date(),
         };
         // Insert the new super admin into the database
-        yield db_config_1.default.execute('INSERT INTO superadmin (name, username, password, lastUpdated, createdOn) VALUES (?, ?, ?, ?, ?, ?)', [
+        yield db_config_1.default.execute('INSERT INTO superadmin (name, username, password, lastUpdated, createdOn) VALUES (?, ?, ?, ?, ?)', [
             newUser.name,
             newUser.username,
             newUser.password,

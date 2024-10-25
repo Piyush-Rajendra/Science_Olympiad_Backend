@@ -45,7 +45,7 @@ export const register = async (req: Request, res: Response) => {
 
     // Insert the new super admin into the database
     await pool.execute(
-      'INSERT INTO superadmin (name, username, password, lastUpdated, createdOn) VALUES (?, ?, ?, ?, ?, ?)',
+      'INSERT INTO superadmin (name, username, password, lastUpdated, createdOn) VALUES (?, ?, ?, ?, ?)',
       [
         newUser.name,
         newUser.username,
