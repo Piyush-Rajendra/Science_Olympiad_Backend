@@ -39,7 +39,7 @@ const createDataTables = () => __awaiter(void 0, void 0, void 0, function* () {
     `);
         // Create Tournament table
         yield db_config_1.default.execute(`
-        CREATE TABLE IF NOT EXISTS Tournament (
+        CREATE TABLE IF NOT EXISTS tournament (
             tournament_id INT AUTO_INCREMENT PRIMARY KEY,
             group_id INT NOT NULL,
             isCurrent BOOLEAN NOT NULL DEFAULT FALSE,
