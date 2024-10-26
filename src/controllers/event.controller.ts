@@ -554,7 +554,7 @@ export const getEventsByTournamentAndSupervisor = async (req: Request, res: Resp
             `SELECT E.event_id, E.name, E.scoringAlg, E.description, E.status, E.scoreStatus
             FROM Event E
             JOIN EventSuperVisorEvent ES ON E.event_id = ES.event_id
-            JOIN Tournament T ON E.tournament_id = T.tournament_id
+            JOIN tournament T ON E.tournament_id = T.tournament_id
             WHERE T.tournament_id = ? AND ES.eventSupervisor_id = ?`,
             [tournamentId, eventSupervisorId]
         ) as [Event[], any];

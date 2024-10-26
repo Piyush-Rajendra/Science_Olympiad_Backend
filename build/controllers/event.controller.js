@@ -465,7 +465,7 @@ const getEventsByTournamentAndSupervisor = (req, res) => __awaiter(void 0, void 
         const [events] = yield db_config_1.default.execute(`SELECT E.event_id, E.name, E.scoringAlg, E.description, E.status, E.scoreStatus
             FROM Event E
             JOIN EventSuperVisorEvent ES ON E.event_id = ES.event_id
-            JOIN Tournament T ON E.tournament_id = T.tournament_id
+            JOIN tournament T ON E.tournament_id = T.tournament_id
             WHERE T.tournament_id = ? AND ES.eventSupervisor_id = ?`, [tournamentId, eventSupervisorId]);
         if (events.length === 0) {
             return res.status(404).json({ message: 'No events found' });
