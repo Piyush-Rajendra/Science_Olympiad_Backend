@@ -58,46 +58,45 @@ export const addTimeblocks = async (req: Request, res: Response) => {
 }
 
 
-// Edit timeblock
 export const editTimeblock = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     const { startTime, endTime, event_id, tournament_id, building, roomNumber, status } = req.body;
 
     if (!id) {
-        return res.status(400).json({ message: 'Invalid timeblock id'});
+        return res.status(400).json({ message: 'Invalid timeblock id' });
     }
 
     try {
-        
         const [startHour, startMinute] = startTime.split(':').map(Number);
         const [endHour, endMinute] = endTime.split(':').map(Number);
 
-        const startDate = new Date()
+        const startDate = new Date();
         startDate.setHours(startHour, startMinute, 0, 0);
-        //const startInTime = startDate.getTime()
+        // Offset start time by 4 hours
+        startDate.setHours(startDate.getHours() + 4);
 
-        const endDate = new Date()
+        const endDate = new Date();
         endDate.setHours(endHour, endMinute, 0, 0);
-        //const endInTime = endDate.getTime()
-        
+        // Offset end time by 4 hours
+        endDate.setHours(endDate.getHours() + 4);
 
         const [update] = await pool.execute(
-            'UPDATE TimeBlock SET TimeBegin = ?, TimeEnd = ?, Event_ID = ?, Tournament_ID = ?, Building = ?, RoomNumber = ?, Status = ? WHERE TimeBlock_ID = ?', 
+            'UPDATE TimeBlock SET TimeBegin = ?, TimeEnd = ?, Event_ID = ?, Tournament_ID = ?, Building = ?, RoomNumber = ?, Status = ? WHERE TimeBlock_ID = ?',
             [startDate, endDate, event_id, tournament_id, building, roomNumber, status, id]
         );
 
         if ('affectedRows' in update) {
             if (update.affectedRows === 0) {
-                return res.status(404).json({ message: 'Timeblock id not found'})
+                return res.status(404).json({ message: 'Timeblock id not found' });
             }
         }
         res.status(200).json({ message: 'Edit timeblock successful' });
 
-
     } catch (error) {
-        res.status(500).json({ message: 'Error editing timeblock '});
+        res.status(500).json({ message: 'Error editing timeblock' });
     }
 }
+
 
 // Delete timeblock (and associated team timeblocks)
 export const deleteTimeblock = async (req: Request, res: Response) => {
