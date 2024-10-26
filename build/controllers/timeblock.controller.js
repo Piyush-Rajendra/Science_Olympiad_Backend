@@ -59,7 +59,6 @@ const addTimeblocks = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.addTimeblocks = addTimeblocks;
-// Edit timeblock
 const editTimeblock = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = parseInt(req.params.id);
     const { startTime, endTime, event_id, tournament_id, building, roomNumber, status } = req.body;
@@ -71,10 +70,12 @@ const editTimeblock = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const [endHour, endMinute] = endTime.split(':').map(Number);
         const startDate = new Date();
         startDate.setHours(startHour, startMinute, 0, 0);
-        //const startInTime = startDate.getTime()
+        // Offset start time by 4 hours
+        startDate.setHours(startDate.getHours() + 4);
         const endDate = new Date();
         endDate.setHours(endHour, endMinute, 0, 0);
-        //const endInTime = endDate.getTime()
+        // Offset end time by 4 hours
+        endDate.setHours(endDate.getHours() + 4);
         const [update] = yield db_config_1.default.execute('UPDATE TimeBlock SET TimeBegin = ?, TimeEnd = ?, Event_ID = ?, Tournament_ID = ?, Building = ?, RoomNumber = ?, Status = ? WHERE TimeBlock_ID = ?', [startDate, endDate, event_id, tournament_id, building, roomNumber, status, id]);
         if ('affectedRows' in update) {
             if (update.affectedRows === 0) {
@@ -84,7 +85,7 @@ const editTimeblock = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         res.status(200).json({ message: 'Edit timeblock successful' });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error editing timeblock ' });
+        res.status(500).json({ message: 'Error editing timeblock' });
     }
 });
 exports.editTimeblock = editTimeblock;
