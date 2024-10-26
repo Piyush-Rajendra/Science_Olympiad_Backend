@@ -14,19 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateTimeBlockStatus = exports.getTimeBlockStatus = exports.getTimeblocksByTournamentId = exports.getTimeblocksByEventId = exports.deleteTimeblock = exports.editTimeblock = exports.addTimeblocks = void 0;
 const db_config_1 = __importDefault(require("../config/db.config"));
-// Add multiple timeblocks (based on how many timeblocks and breaks between)
 const addTimeblocks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { startTime, event_id, tournament_id, building, roomNumber, status, duration, breakTime, amount } = req.body;
-    /*
-    console.log("Start time: ", startTime);
-    console.log("Event_id: ", event_id);
-    console.log("Tournament_id: ", tournament_id);
-    console.log("Building: ", building);
-    console.log("Room Number: ", roomNumber);
-    console.log("Status: ", status);
-    console.log("Duration: ", duration);
-    console.log("Break Time: ", breakTime);
-    console.log("Amount: ", amount);*/
     if (!startTime || !event_id || !tournament_id || !building || !roomNumber || !duration || !breakTime || !amount) {
         return res.status(400).json({ message: 'Missing information to add timeblock' });
     }
@@ -35,7 +24,9 @@ const addTimeblocks = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const durationMs = duration * 60 * 1000;
         const breakTimeMs = breakTime * 60 * 1000;
         const date = new Date();
-        date.setHours(startHour, startMinute, 4, 4);
+        date.setHours(startHour, startMinute, 0, 0);
+        // Offset start time by 4 hours
+        date.setHours(date.getHours() + 4);
         const startInTime = date.getTime();
         for (let i = 0; i < amount; i++) {
             const newStart = new Date(startInTime + (i * durationMs) + (i * breakTimeMs));
