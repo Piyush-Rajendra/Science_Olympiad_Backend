@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import pool from '../config/db.config';
+import pool from '../../config/db.config';
 import { ITeamTimeBlock, ITimeBlock } from '../models/data.models';
 
 // Add multiple timeblocks (based on how many timeblocks and breaks between)
@@ -27,7 +27,7 @@ export const addTimeblocks = async (req: Request, res: Response) => {
         const breakTimeMs = breakTime * 60 * 1000;
 
         const date = new Date()
-        date.setHours(startHour, startMinute, 0, 0);
+        date.setHours(startHour, startMinute, 4, 4);
         const startInTime = date.getTime()
         for (let i = 0; i < amount; i++) {
             const newStart = new Date(startInTime + (i * durationMs) + (i * breakTimeMs));
