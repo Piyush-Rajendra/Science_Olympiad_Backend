@@ -2,23 +2,11 @@ import { Request, Response } from 'express';
 import pool from '../config/db.config';
 import { ITeamTimeBlock, ITimeBlock } from '../models/data.models';
 
-// Add multiple timeblocks (based on how many timeblocks and breaks between)
 export const addTimeblocks = async (req: Request, res: Response) => {
     const { startTime, event_id, tournament_id, building, roomNumber, status, duration, breakTime, amount } = req.body;
-    /*
-    console.log("Start time: ", startTime);
-    console.log("Event_id: ", event_id);
-    console.log("Tournament_id: ", tournament_id);
-    console.log("Building: ", building);
-    console.log("Room Number: ", roomNumber);
-    console.log("Status: ", status);
-    console.log("Duration: ", duration);
-    console.log("Break Time: ", breakTime);
-    console.log("Amount: ", amount);*/
-
 
     if (!startTime || !event_id || !tournament_id || !building || !roomNumber || !duration || !breakTime || !amount) {
-        return res.status(400).json({ message: 'Missing information to add timeblock'});
+        return res.status(400).json({ message: 'Missing information to add timeblock' });
     }
 
     try {
@@ -26,9 +14,13 @@ export const addTimeblocks = async (req: Request, res: Response) => {
         const durationMs = duration * 60 * 1000;
         const breakTimeMs = breakTime * 60 * 1000;
 
-        const date = new Date()
-        date.setHours(startHour, startMinute, 4, 4);
-        const startInTime = date.getTime()
+        const date = new Date();
+        date.setHours(startHour, startMinute, 0, 0);
+        
+        // Offset start time by 4 hours
+        date.setHours(date.getHours() + 4);
+
+        const startInTime = date.getTime();
         for (let i = 0; i < amount; i++) {
             const newStart = new Date(startInTime + (i * durationMs) + (i * breakTimeMs));
             const newEnd = new Date(newStart.getTime() + (durationMs));
@@ -42,7 +34,7 @@ export const addTimeblocks = async (req: Request, res: Response) => {
                 building: building,
                 roomNumber: roomNumber,
                 status: status
-            }
+            };
 
             await pool.execute(
                 'INSERT INTO TimeBlock (TimeBlock_ID, Event_ID, Tournament_ID, TimeBegin, TimeEnd, Building, RoomNumber, Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
@@ -56,7 +48,7 @@ export const addTimeblocks = async (req: Request, res: Response) => {
                     newTimeblock.roomNumber,
                     newTimeblock.status
                 ]
-            )
+            );
         }
         res.status(201).json({ message: 'Timeblock created successfully' });
 
@@ -64,6 +56,7 @@ export const addTimeblocks = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Error adding timeblocks', error });
     }
 }
+
 
 // Edit timeblock
 export const editTimeblock = async (req: Request, res: Response) => {
