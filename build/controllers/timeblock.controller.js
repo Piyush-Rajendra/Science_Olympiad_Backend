@@ -35,7 +35,7 @@ const addTimeblocks = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const durationMs = duration * 60 * 1000;
         const breakTimeMs = breakTime * 60 * 1000;
         const date = new Date();
-        date.setHours(startHour, startMinute, 0, 0);
+        date.setHours(startHour, startMinute, 4, 4);
         const startInTime = date.getTime();
         for (let i = 0; i < amount; i++) {
             const newStart = new Date(startInTime + (i * durationMs) + (i * breakTimeMs));
