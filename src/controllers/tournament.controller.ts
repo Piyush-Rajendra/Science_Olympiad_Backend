@@ -332,7 +332,7 @@ export const exportTournamentScoresToExcel = async (req: Request, res: Response)
                     flightRankA: null, // Initialize flight rank A
                     flightRankB: null, // Initialize flight rank B
                 }))
-                .filter((tt) => tt.score !== null); // Only rank non-null scores
+                //.filter((tt) => tt.score !== null); // Only rank non-null scores
 
             // Rank all teams in the event (irrespective of flight)
             rankTeams(rankedTeams, scoringAlg);
@@ -389,6 +389,7 @@ export const exportTournamentScoresToExcel = async (req: Request, res: Response)
             return {
                 unique_id: parseInt(teamId),
                 teamName: teamNamesMap[parseInt(teamId)] || 'Unknown', // Use the map to get team name
+                teamIden: teamId,  // Assuming `teamId` is equivalent to `teamIden` here
                 eventRanks,
             };
         });
@@ -397,14 +398,13 @@ export const exportTournamentScoresToExcel = async (req: Request, res: Response)
         const defaultRank = allTeamTimeBlocks.length + 1; // Assuming this is higher than any possible rank
         
         teamEntries.forEach((team) => {
-            const row = [team.unique_id, team.unique_id, team.teamName]; // Unique ID and Team Identifier
+            const row = [team.unique_id, team.teamIden, team.teamName]; // Add teamIden to this row
         
             events.forEach((event) => {
                 const eventRank = team.eventRanks[event.event_id] || defaultRank; // Use default rank if missing
                 row.push(eventRank);
             });
         
-            // Calculate total rank (sum of ranks across all events)
             const totalRank = Object.values(team.eventRanks).reduce((sum, rank) => sum + rank, 0) +
                               (events.length - Object.keys(team.eventRanks).length) * defaultRank; // Add default ranks for missing events
             row.push(totalRank); // Add total rank to the row in the main sheet
